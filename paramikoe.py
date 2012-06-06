@@ -11,7 +11,6 @@
 #
 # You must have Paramiko installed in order to use this library.
 #
-
 import sys
 import re
 import types
@@ -19,7 +18,6 @@ import socket
 import termios
 import tty
 import select
-
 import paramiko
 
 class SSHClientInteraction:
