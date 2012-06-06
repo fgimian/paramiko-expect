@@ -26,11 +26,11 @@ class SSHClientInteraction:
     """This class allows an expect-like interface to Paramiko which allows coders
     to interact with applications and the shell of the connected device."""
 
-    def __init__(self, channel, timeout=60, newline='\r', buffer_size=1024, display=False):
+    def __init__(self, client, timeout=60, newline='\r', buffer_size=1024, display=False):
         """The constructor for our SSHClientInteraction class.
 
         Arguments:
-        channel -- An SSH Paramiko channel object
+        client -- A Paramiko SSHClient object
 
         Keyword arguments:
         timeout -- THe connection timeout in seconds
@@ -41,7 +41,7 @@ class SSHClientInteraction:
                    it is being performed (especially useful when debugging)
 
         """
-        self.channel = channel.invoke_shell()
+        self.channel = client.invoke_shell()
         self.newline = newline
         self.buffer_size = buffer_size
         self.display = display
