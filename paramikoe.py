@@ -143,6 +143,53 @@ class SSHClientInteraction:
         self.current_send_string = send_string
         self.channel.send(send_string + self.newline)
 
+    def tail(self, line_prefix=None):
+        """This function takes control of an SSH channel and displays line
+        by line of output as \n is recieved.  This function is specifically
+        made for tail-like commands.
+
+        Keyword arguments:
+        line_prefix -- Text to append to the left of each line of output.
+                       This is especially useful if you are using my
+                       MultiSSH class to run tail commands over multiple
+                       servers.
+
+        """
+
+        # Set the channel timeout to the maximum integer the server allows, setting this to None
+        # Breaks the KeyboardInterrupt exception and won't allow us to Ctrl+C out of teh script
+        self.channel.settimeout(sys.maxint)
+
+        # Create an empty line buffer and a line counter
+        current_line = ''
+        line_counter = 0
+
+        # Loop forever, Ctrl+C (KeyboardInterrupt) is used to break the tail
+        while True:
+
+            # Read the output one byte at a time so we can detect \n correctly
+            buffer = self.channel.recv(1)
+
+            # If we have an empty buffer, then the SSH session has been closed
+            if len(buffer) == 0:
+                break
+
+            # Strip all ugly \r (Ctrl-M making) characters from the current read
+            buffer = buffer.replace('\r', '')
+
+            # Add the currently read buffer to the current line output
+            current_line += buffer
+
+            # Display the last read line in realtime when we reach a \n character
+            if current_line.endswith('\n'):
+                if line_counter and line_prefix:
+                    sys.stdout.write(line_prefix)
+                if line_counter:
+                    sys.stdout.write(current_line)
+                    sys.stdout.flush()
+                line_counter += 1
+                current_line = ''
+
     def take_control(self):
         """This function is a better documented and touched up version of the posix_shell function
         found in the interactive.py demo script that ships with Paramiko"""
