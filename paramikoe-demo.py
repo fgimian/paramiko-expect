@@ -81,7 +81,6 @@ def main():
 
     except Exception as e:
         traceback.print_exc()
-        exit(1)
     finally:
         try:
             client.close()
