@@ -1,14 +1,22 @@
-# Paramiko Expect
+# Paramiko Expect #
 
 This is my Python expect-like extension for the Paramiko SSH library which allows scripts to fully interact with hosts via a true SSH connection.
 
-The class is constructed with an SSH Client object (this will likely change to a transport in future for more flexibility).
+The class is constructed with an SSH Client object (this will likely be extended to support a transport in future for more flexibility).
 
-## General Usage
+## Installation ##
 
-So let's check out how it works in general (please see **paramikoe-demo.py** for the complete code):
+To install paramiko-expect, simply run the following at your prompt:
 
-```python
+``` bash
+pip install git+https://github.com/fgimian/paramiko-expect.git
+```
+
+## General Usage ##
+
+So let's check out how it works in general (please see **paramikoe-demo.py** under the **examples** directory for the complete code):
+
+``` python
 # Connect to the host
 client.connect(hostname=hostname, username=username, password=password)
 
@@ -58,7 +66,7 @@ print 'ls -l / output:'
 print cmd_output_ls
 ```
 
-**Important**: Before running this script, be sure to place **paramikoe-demo-helper.py** in **~**
+**Important**: Before running this script, be sure to place **paramikoe-demo-helper.py** from the **examples** directory in **~**
 
 The print statements at the bottom of the script provide the following output:
 
@@ -96,7 +104,7 @@ drwxr-xr-x 12 root root  4096 Jun 12 13:16 var
 lrwxrwxrwx  1 root root    29 May  1 22:18 vmlinuz -> boot/vmlinuz-3.2.0-23-generic
 ```
 
-## Tail-like Usage
+## Tail-like Usage ##
 
 For interacting with tail-like scripts, we can use the tail function (please see **paramikoe-tail-demo.py** for the complete code)::
 
@@ -115,4 +123,4 @@ interact.send('tail -f /var/log/auth.log')
 interact.tail(line_prefix=hostname+': ')
 ```
 
-The true power of the tail function will become more apparent when you check out the Multi-SSH library.  Ever thought about tailing a log on multiple servers?  Well dream no more my friend, it's here!
+The true power of the tail function will become more apparent when you check out the [Multi-SSH](https://github.com/fgimian/multi-ssh) library.  Ever thought about tailing a log on multiple servers?  Well dream no more my friend, it's here!
