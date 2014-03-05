@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 #
 # Paramiko Expect Demo
-# 
+#
 # Written by Fotis Gimian
 # http://github.com/fgimian
 #
-# This script demonstrates the SSHClientInteraction class in the paramiko expect library
+# This script demonstrates the SSHClientInteraction class in the paramiko
+# expect library
 #
-import sys
 import traceback
-import re
 import paramiko
 from paramikoe import SSHClientInteraction
+
 
 def main():
 
@@ -38,8 +38,8 @@ def main():
         interact = SSHClientInteraction(client, timeout=10, display=True)
         interact.expect(prompt)
 
-        # Run the first command and capture the cleaned output, if you want the output
-        # without cleaning, simply grab current_output instead.
+        # Run the first command and capture the cleaned output, if you want
+        # the output without cleaning, simply grab current_output instead.
         interact.send('uname -a')
         interact.expect(prompt)
         cmd_output_uname = interact.current_output_clean
@@ -49,17 +49,19 @@ def main():
         interact.expect(prompt)
         cmd_output_ls = interact.current_output_clean
 
-        # To expect multiple expressions, just use a list.  You can also selectively
-        # take action based on what was matched.
+        # To expect multiple expressions, just use a list.  You can also
+        # selectively take action based on what was matched.
 
-        # Method 1: You may use the last_match property to find out what was matched
+        # Method 1: You may use the last_match property to find out what was
+        # matched
         interact.send('~/paramikoe-demo-helper.py')
         interact.expect([prompt, 'Please enter your name: '])
         if interact.last_match == 'Please enter your name: ':
             interact.send('Fotis Gimian')
             interact.expect(prompt)
 
-        # Method 2: You may use the matched index to determine the last match (like pexpect)
+        # Method 2: You may use the matched index to determine the last match
+        # (like pexpect)
         interact.send('~/paramikoe-demo-helper.py')
         found_index = interact.expect([prompt, 'Please enter your name: '])
         if found_index == 1:
@@ -79,7 +81,7 @@ def main():
         print 'ls -l / output:'
         print cmd_output_ls
 
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
     finally:
         try:

@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 #
 # Paramiko Expect Demo Helper
-# 
+#
 # Written by Fotis Gimian
 # http://github.com/fgimian
 #
-# This interactive script is used to help demonstrate the paramikoe-demo.py script
+# This interactive script is used to help demonstrate the paramikoe-demo.py
+# script
 #
-import sys
+
 
 def main():
 

@@ -1,6 +1,6 @@
 #
 # Paramiko Expect
-# 
+#
 # Written by Fotis Gimian
 # http://github.com/fgimian
 #
@@ -13,18 +13,19 @@
 #
 import sys
 import re
-import types
 import socket
 import termios
 import tty
 import select
-import paramiko
+
 
 class SSHClientInteraction:
-    """This class allows an expect-like interface to Paramiko which allows coders
-    to interact with applications and the shell of the connected device."""
+    """This class allows an expect-like interface to Paramiko which allows
+    coders to interact with applications and the shell of the connected
+    device."""
 
-    def __init__(self, client, timeout=60, newline='\r', buffer_size=1024, display=False):
+    def __init__(self, client, timeout=60, newline='\r', buffer_size=1024,
+                 display=False):
         """The constructor for our SSHClientInteraction class.
 
         Arguments:
@@ -33,10 +34,10 @@ class SSHClientInteraction:
         Keyword arguments:
         timeout -- THe connection timeout in seconds
         newline -- The newline character to send after each command
-        buffer_size -- The amount of data (in bytes) that will be read at a time
-                       after a command is run
-        display -- Whether or not the output should be displayed in real-time as
-                   it is being performed (especially useful when debugging)
+        buffer_size -- The amount of data (in bytes) that will be read at a
+                       time after a command is run
+        display -- Whether or not the output should be displayed in real-time
+                   as it is being performed (especially useful when debugging)
 
         """
         self.channel = client.invoke_shell()
@@ -63,9 +64,9 @@ class SSHClientInteraction:
     def expect(self, re_strings=''):
         """This function takes in a regular expression (or regular expressions)
         that represent the last line of output from the server.  The function
-        waits for one or more of the terms to be matched.  The regexes are matched
-        using expression \n<regex>$ so you'll need to provide an easygoing regex
-        such as '.*server.*' if you wish to have a fuzzy match.
+        waits for one or more of the terms to be matched.  The regexes are
+        matched using expression \n<regex>$ so you'll need to provide an
+        easygoing regex such as '.*server.*' if you wish to have a fuzzy match.
 
         Keyword arguments:
         re_strings -- Either a regex string or list of regex strings that
@@ -87,14 +88,21 @@ class SSHClientInteraction:
         # Create an empty output buffer
         self.current_output = ''
 
-        # This function needs all regular expressions to be in the form of a list, so
-        # if the user provided a string, let's convert it to a 1 item list.
-        if len(re_strings) != 0 and type(re_strings) == types.StringType:
+        # This function needs all regular expressions to be in the form of a
+        # list, so if the user provided a string, let's convert it to a 1
+        # item list.
+        if len(re_strings) != 0 and isinstance(re_strings, str):
             re_strings = [re_strings]
 
-        # Loop until one of the expressions is matched or loop forever if nothing is expected (usually used for exit)
-        while len(re_strings) == 0 or \
-              not [re_string for re_string in re_strings if re.match('.*\n' + re_string + '$', self.current_output, re.DOTALL)]:
+        # Loop until one of the expressions is matched or loop forever if
+        # nothing is expected (usually used for exit)
+        while (
+            len(re_strings) == 0 or
+            not [re_string
+                 for re_string in re_strings
+                 if re.match('.*\n' + re_string + '$',
+                             self.current_output, re.DOTALL)]
+        ):
 
             # Read some of the output
             buffer = self.channel.recv(self.buffer_size)
@@ -103,11 +111,12 @@ class SSHClientInteraction:
             if len(buffer) == 0:
                 break
 
-            # Strip all ugly \r (Ctrl-M making) characters from the current read
+            # Strip all ugly \r (Ctrl-M making) characters from the current
+            # read
             buffer = buffer.replace('\r', '')
 
-            # Display the current buffer in realtime if requested to do so (good for
-            # debugging purposes)
+            # Display the current buffer in realtime if requested to do so
+            # (good for debugging purposes)
             if self.display:
                 sys.stdout.write(buffer)
                 sys.stdout.flush()
@@ -117,25 +126,34 @@ class SSHClientInteraction:
 
         # Grab the first pattern that was matched
         if len(re_strings) != 0:
-            found_pattern = [(re_index, re_string) for re_index, re_string in enumerate(re_strings) if re.match('.*\n' + re_string + '$', self.current_output, re.DOTALL)]
+            found_pattern = [(re_index, re_string)
+                             for re_index, re_string in enumerate(re_strings)
+                             if re.match('.*\n' + re_string + '$',
+                                         self.current_output, re.DOTALL)]
 
         self.current_output_clean = self.current_output
 
         # Clean the output up by removing the sent command
         if len(self.current_send_string) != 0:
-            self.current_output_clean = self.current_output_clean.replace(self.current_send_string + '\n', '')
+            self.current_output_clean = (
+                self.current_output_clean.replace(
+                    self.current_send_string + '\n', ''))
 
-        # Reset the current send string to ensure that multiple expect calls don't result in bad output cleaning
+        # Reset the current send string to ensure that multiple expect calls
+        # don't result in bad output cleaning
         self.current_send_string = ''
 
-        # Clean the output up by removing the expect output from the end if requested and
-        # save the details of the matched pattern
+        # Clean the output up by removing the expect output from the end if
+        # requested and save the details of the matched pattern
         if len(re_strings) != 0:
-            self.current_output_clean = re.sub(found_pattern[0][1] + '$', '', self.current_output_clean)
+            self.current_output_clean = (
+                re.sub(found_pattern[0][1] + '$', '',
+                       self.current_output_clean))
             self.last_match = found_pattern[0][1]
             return found_pattern[0][0]
         else:
-            # We would socket timeout before getting here, but for good measure, let's send back a -1
+            # We would socket timeout before getting here, but for good
+            # measure, let's send back a -1
             return -1
 
     def send(self, send_string):
@@ -156,8 +174,9 @@ class SSHClientInteraction:
 
         """
 
-        # Set the channel timeout to the maximum integer the server allows, setting this to None
-        # Breaks the KeyboardInterrupt exception and won't allow us to Ctrl+C out of teh script
+        # Set the channel timeout to the maximum integer the server allows,
+        # setting this to None breaks the KeyboardInterrupt exception and
+        # won't allow us to Ctrl+C out of teh script
         self.channel.settimeout(sys.maxint)
 
         # Create an empty line buffer and a line counter
@@ -174,13 +193,15 @@ class SSHClientInteraction:
             if len(buffer) == 0:
                 break
 
-            # Strip all ugly \r (Ctrl-M making) characters from the current read
+            # Strip all ugly \r (Ctrl-M making) characters from the current
+            # read
             buffer = buffer.replace('\r', '')
 
             # Add the currently read buffer to the current line output
             current_line += buffer
 
-            # Display the last read line in realtime when we reach a \n character
+            # Display the last read line in realtime when we reach a \n
+            # character
             if current_line.endswith('\n'):
                 if line_counter and line_prefix:
                     sys.stdout.write(line_prefix)
@@ -191,24 +212,27 @@ class SSHClientInteraction:
                 current_line = ''
 
     def take_control(self):
-        """This function is a better documented and touched up version of the posix_shell function
-        found in the interactive.py demo script that ships with Paramiko"""
+        """This function is a better documented and touched up version of the
+        posix_shell function found in the interactive.py demo script that
+        ships with Paramiko"""
 
         # Get attributes of the shell you were in before going to the new one
         original_tty = termios.tcgetattr(sys.stdin)
         try:
             tty.setraw(sys.stdin.fileno())
             tty.setcbreak(sys.stdin.fileno())
-            
+
             # We must set the timeout to 0 so that we can bypass times when
             # there is no available text to receive
             self.channel.settimeout(0)
-            
+
             # Loop forever until the user exits (i.e. read buffer is empty)
             while True:
-                select_read, select_write, select_exception = select.select([self.channel, sys.stdin], [], [])
+                select_read, select_write, select_exception = (
+                    select.select([self.channel, sys.stdin], [], []))
                 # Read any output from the terminal and print it to the screen.
-                # With timeout set to 0, we just can ignore times when there's nothing to receive.
+                # With timeout set to 0, we just can ignore times when there's
+                # nothing to receive.
                 if self.channel in select_read:
                     try:
                         buffer = self.channel.recv(self.buffer_size)
