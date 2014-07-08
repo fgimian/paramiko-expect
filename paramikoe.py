@@ -14,8 +14,14 @@
 import sys
 import re
 import socket
-import termios
-import tty
+# windows does not have termios...
+try:
+    import termios
+    import tty
+    has_termios = True
+except ImportError:
+    has_termios = False
+
 import select
 
 
@@ -216,38 +222,64 @@ class SSHClientInteraction:
         posix_shell function found in the interactive.py demo script that
         ships with Paramiko"""
 
-        # Get attributes of the shell you were in before going to the new one
-        original_tty = termios.tcgetattr(sys.stdin)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            tty.setcbreak(sys.stdin.fileno())
+        if has_termios:
+            # Get attributes of the shell you were in before going to the new one
+            original_tty = termios.tcgetattr(sys.stdin)
+            try:
+                tty.setraw(sys.stdin.fileno())
+                tty.setcbreak(sys.stdin.fileno())
 
-            # We must set the timeout to 0 so that we can bypass times when
-            # there is no available text to receive
-            self.channel.settimeout(0)
+                # We must set the timeout to 0 so that we can bypass times when
+                # there is no available text to receive
+                self.channel.settimeout(0)
 
-            # Loop forever until the user exits (i.e. read buffer is empty)
-            while True:
-                select_read, select_write, select_exception = (
-                    select.select([self.channel, sys.stdin], [], []))
-                # Read any output from the terminal and print it to the screen.
-                # With timeout set to 0, we just can ignore times when there's
-                # nothing to receive.
-                if self.channel in select_read:
-                    try:
-                        buffer = self.channel.recv(self.buffer_size)
+                # Loop forever until the user exits (i.e. read buffer is empty)
+                while True:
+                    select_read, select_write, select_exception = (
+                        select.select([self.channel, sys.stdin], [], []))
+                    # Read any output from the terminal and print it to the screen.
+                    # With timeout set to 0, we just can ignore times when there's
+                    # nothing to receive.
+                    if self.channel in select_read:
+                        try:
+                            buffer = self.channel.recv(self.buffer_size)
+                            if len(buffer) == 0:
+                                break
+                            sys.stdout.write(buffer)
+                            sys.stdout.flush()
+                        except socket.timeout:
+                            pass
+                    # Send any keyboard input to the terminal one byte at a time
+                    if sys.stdin in select_read:
+                        buffer = sys.stdin.read(1)
                         if len(buffer) == 0:
                             break
-                        sys.stdout.write(buffer)
-                        sys.stdout.flush()
-                    except socket.timeout:
-                        pass
-                # Send any keyboard input to the terminal one byte at a time
-                if sys.stdin in select_read:
-                    buffer = sys.stdin.read(1)
-                    if len(buffer) == 0:
+                        self.channel.send(buffer)
+            finally:
+                # Restore the attributes of the shell you were in
+                termios.tcsetattr(sys.stdin, termios.TCSADRAIN, original_tty)
+
+        else: # if has_termios
+        
+            import threading
+            
+            def writeall(sock):
+                while True:
+                    data = sock.recv(256)
+                    if not data:
                         break
-                    self.channel.send(buffer)
-        finally:
-            # Restore the attributes of the shell you were in
-            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, original_tty)
+                    sys.stdout.write(data)
+                    sys.stdout.flush()
+                
+            writer = threading.Thread(target=writeall, args=(self.channel,))
+            writer.start()
+                
+            try:
+                while True:
+                    d = sys.stdin.read(1)
+                    if not d:
+                        break
+                    self.channel.send(d)
+            except EOFError:
+                # user hit ^Z or F6
+                pass
