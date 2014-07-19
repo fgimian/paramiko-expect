@@ -14,12 +14,13 @@
 import sys
 import re
 import socket
-# windows does not have termios...
+# Windows does not have termios
 try:
     import termios
     import tty
     has_termios = True
 except ImportError:
+    import threading
     has_termios = False
 
 import select
@@ -28,7 +29,8 @@ import select
 class SSHClientInteraction:
     """This class allows an expect-like interface to Paramiko which allows
     coders to interact with applications and the shell of the connected
-    device."""
+    device.
+    """
 
     def __init__(self, client, timeout=60, newline='\r', buffer_size=1024,
                  display=False):
@@ -61,7 +63,7 @@ class SSHClientInteraction:
         self.close()
 
     def close(self):
-        """Attempts to close the channel for clean completion"""
+        """Attempts to close the channel for clean completion."""
         try:
             self.channel.close()
         except:
@@ -85,7 +87,6 @@ class SSHClientInteraction:
         - Regex String: When matched, returns 0
         - List of Regex Strings: Returns the index of the matched string as
                                  an integer
-
         """
 
         # Set the channel timeout
@@ -223,7 +224,8 @@ class SSHClientInteraction:
         ships with Paramiko"""
 
         if has_termios:
-            # Get attributes of the shell you were in before going to the new one
+            # Get attributes of the shell you were in before going to the
+            # new one
             original_tty = termios.tcgetattr(sys.stdin)
             try:
                 tty.setraw(sys.stdin.fileno())
@@ -237,9 +239,9 @@ class SSHClientInteraction:
                 while True:
                     select_read, select_write, select_exception = (
                         select.select([self.channel, sys.stdin], [], []))
-                    # Read any output from the terminal and print it to the screen.
-                    # With timeout set to 0, we just can ignore times when there's
-                    # nothing to receive.
+                    # Read any output from the terminal and print it to the
+                    # screen.  With timeout set to 0, we just can ignore times
+                    # when there's nothing to receive.
                     if self.channel in select_read:
                         try:
                             buffer = self.channel.recv(self.buffer_size)
@@ -249,7 +251,8 @@ class SSHClientInteraction:
                             sys.stdout.flush()
                         except socket.timeout:
                             pass
-                    # Send any keyboard input to the terminal one byte at a time
+                    # Send any keyboard input to the terminal one byte at a
+                    # time
                     if sys.stdin in select_read:
                         buffer = sys.stdin.read(1)
                         if len(buffer) == 0:
@@ -258,28 +261,24 @@ class SSHClientInteraction:
             finally:
                 # Restore the attributes of the shell you were in
                 termios.tcsetattr(sys.stdin, termios.TCSADRAIN, original_tty)
-
-        else: # if has_termios
-        
-            import threading
-            
+        else:
             def writeall(sock):
                 while True:
-                    data = sock.recv(256)
-                    if not data:
+                    buffer = sock.recv(self.buffer_size)
+                    if len(buffer) == 0:
                         break
-                    sys.stdout.write(data)
+                    sys.stdout.write(buffer)
                     sys.stdout.flush()
-                
+
             writer = threading.Thread(target=writeall, args=(self.channel,))
             writer.start()
-                
+
             try:
                 while True:
-                    d = sys.stdin.read(1)
-                    if not d:
+                    buffer = sys.stdin.read(1)
+                    if len(buffer) == 0:
                         break
-                    self.channel.send(d)
+                    self.channel.send(buffer)
+            # User has hit Ctrl+Z or F6
             except EOFError:
-                # user hit ^Z or F6
                 pass
