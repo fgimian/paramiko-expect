@@ -69,7 +69,7 @@ class SSHClientInteraction:
         except:
             pass
 
-    def expect(self, re_strings=''):
+    def expect(self, re_strings='', timeout=None):
         """This function takes in a regular expression (or regular expressions)
         that represent the last line of output from the server.  The function
         waits for one or more of the terms to be matched.  The regexes are
@@ -82,15 +82,21 @@ class SSHClientInteraction:
                       EOF is expected (i.e. the shell is completely closed
                       after the exit command is issued)
 
+        timeout -- (long) timeout in seconds, if this timeout pass, should raise exception
+
         Returns:
         - EOF: Returns -1
         - Regex String: When matched, returns 0
         - List of Regex Strings: Returns the index of the matched string as
                                  an integer
+
+        Raises:
+            exception on timeout
         """
 
         # Set the channel timeout
-        self.channel.settimeout(self.timeout)
+        if timeout is None: timeout = self.timeout
+        self.channel.settimeout(timeout)
 
         # Create an empty output buffer
         self.current_output = ''
