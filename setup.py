@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='paramiko-expect',
-    version='0.1',
+    version='0.1.1',
     url='https://github.com/fgimian/paramiko-expect',
     license='MIT',
     author='Fotis Gimian',

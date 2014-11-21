@@ -82,7 +82,8 @@ class SSHClientInteraction:
                       EOF is expected (i.e. the shell is completely closed
                       after the exit command is issued)
 
-        timeout -- (long) timeout in seconds, if this timeout pass, should raise exception
+        timeout -- Timeout in seconds.  If this timeout is exceeded, then an
+                   exception is raised.
 
         Returns:
         - EOF: Returns -1
@@ -95,7 +96,7 @@ class SSHClientInteraction:
         """
 
         # Set the channel timeout
-        if timeout is None: timeout = self.timeout
+        timeout = timeout if timeout else self.timeout
         self.channel.settimeout(timeout)
 
         # Create an empty output buffer
