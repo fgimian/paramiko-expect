@@ -175,7 +175,7 @@ class SSHClientInteraction:
         self.current_send_string = send_string
         self.channel.send(send_string + self.newline)
 
-    def tail(self, line_prefix=None):
+    def tail(self, line_prefix=None, callback=None):
         """This function takes control of an SSH channel and displays line
         by line of output as \n is recieved.  This function is specifically
         made for tail-like commands.
@@ -185,7 +185,12 @@ class SSHClientInteraction:
                        This is especially useful if you are using my
                        MultiSSH class to run tail commands over multiple
                        servers.
-
+        callback -- You may optionally supply a callback function which
+                    takes two paramaters.  The first is the line prefix
+                    and the second is current line of output. The
+                    callback should return the string that is to be
+                    displayed (including the \n character).  This allows
+                    users to grep the output or manipulate it as required.
         """
 
         # Set the channel timeout to the maximum integer the server allows,
@@ -217,11 +222,14 @@ class SSHClientInteraction:
             # Display the last read line in realtime when we reach a \n
             # character
             if current_line.endswith('\n'):
-                if line_counter and line_prefix:
-                    sys.stdout.write(line_prefix)
-                if line_counter:
-                    sys.stdout.write(current_line)
-                    sys.stdout.flush()
+                if line_counter and callback:
+                    sys.stdout.write(callback(line_prefix, current_line))
+                else:
+                    if line_counter and line_prefix:
+                        sys.stdout.write(line_prefix)
+                    if line_counter:
+                        sys.stdout.write(current_line)
+                sys.stdout.flush()
                 line_counter += 1
                 current_line = ''
 
