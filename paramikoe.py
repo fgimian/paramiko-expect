@@ -33,7 +33,7 @@ class SSHClientInteraction:
     """
 
     def __init__(self, client, timeout=60, newline='\r', buffer_size=1024,
-                 display=False):
+                 display=False, tty_width=80, tty_height=24):
         """The constructor for our SSHClientInteraction class.
 
         Arguments:
@@ -46,9 +46,12 @@ class SSHClientInteraction:
                        time after a command is run
         display -- Whether or not the output should be displayed in real-time
                    as it is being performed (especially useful when debugging)
+        tty_width -- The width of the terminal (useful if the dimensions of the 
+                     terminal matter for the application)
+        tty_height -- The height of the terminal.
 
         """
-        self.channel = client.invoke_shell()
+        self.channel = client.invoke_shell(width=tty_width, height=tty_height)
         self.newline = newline
         self.buffer_size = buffer_size
         self.display = display
