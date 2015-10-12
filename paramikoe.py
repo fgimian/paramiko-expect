@@ -114,7 +114,7 @@ class SSHClientInteraction:
             len(re_strings) == 0 or
             not [re_string
                  for re_string in re_strings
-                 if re.match('.*\n' + re_string + '$',
+                 if re.match(re_string + '$',
                              self.current_output, re.DOTALL)]
         ):
 
@@ -142,7 +142,7 @@ class SSHClientInteraction:
         if len(re_strings) != 0:
             found_pattern = [(re_index, re_string)
                              for re_index, re_string in enumerate(re_strings)
-                             if re.match('.*\n' + re_string + '$',
+                             if re.match(re_string + '$',
                                          self.current_output, re.DOTALL)]
 
         self.current_output_clean = self.current_output
