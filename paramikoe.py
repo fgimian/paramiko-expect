@@ -14,6 +14,7 @@
 import sys
 import re
 import socket
+
 # Windows does not have termios
 try:
     import termios
@@ -27,39 +28,37 @@ import select
 
 
 class SSHClientInteraction:
-    """This class allows an expect-like interface to Paramiko which allows
+    """
+    This class allows an expect-like interface to Paramiko which allows
     coders to interact with applications and the shell of the connected
     device.
+
+    :param client: A Paramiko SSHClient object
+    :param timeout: The connection timeout in seconds
+    :param newline: The newline character to send after each command
+    :param buffer_size: The amount of data (in bytes) that will be read at
+                        a time after a command is run
+    :param display: Whether or not the output should be displayed in
+                    real-time as it is being performed (especially useful
+                    when debugging)
     """
 
-    def __init__(self, client, timeout=60, newline='\r', buffer_size=1024,
-                 display=False):
-        """The constructor for our SSHClientInteraction class.
-
-        Arguments:
-        client -- A Paramiko SSHClient object
-
-        Keyword arguments:
-        timeout -- THe connection timeout in seconds
-        newline -- The newline character to send after each command
-        buffer_size -- The amount of data (in bytes) that will be read at a
-                       time after a command is run
-        display -- Whether or not the output should be displayed in real-time
-                   as it is being performed (especially useful when debugging)
-
-        """
+    def __init__(
+        self, client, timeout=60, newline='\r', buffer_size=1024,
+        display=False
+    ):
         self.channel = client.invoke_shell()
+        self.timeout = timeout
         self.newline = newline
         self.buffer_size = buffer_size
         self.display = display
-        self.timeout = timeout
+
         self.current_output = ''
         self.current_output_clean = ''
         self.current_send_string = ''
         self.last_match = ''
 
     def __del__(self):
-        """The destructor for our SSHClientInteraction class."""
         self.close()
 
     def close(self):
@@ -70,29 +69,24 @@ class SSHClientInteraction:
             pass
 
     def expect(self, re_strings='', timeout=None):
-        """This function takes in a regular expression (or regular expressions)
+        """
+        This function takes in a regular expression (or regular expressions)
         that represent the last line of output from the server.  The function
         waits for one or more of the terms to be matched.  The regexes are
         matched using expression \n<regex>$ so you'll need to provide an
-        easygoing regex such as '.*server.*' if you wish to have a fuzzy match.
+        easygoing regex such as '.*server.*' if you wish to have a fuzzy
+        match.
 
-        Keyword arguments:
-        re_strings -- Either a regex string or list of regex strings that
-                      we should expect.  If this is not specified, then
-                      EOF is expected (i.e. the shell is completely closed
-                      after the exit command is issued)
-
-        timeout -- Timeout in seconds.  If this timeout is exceeded, then an
-                   exception is raised.
-
-        Returns:
-        - EOF: Returns -1
-        - Regex String: When matched, returns 0
-        - List of Regex Strings: Returns the index of the matched string as
-                                 an integer
-
-        Raises:
-            exception on timeout
+        :param re_strings: Either a regex string or list of regex strings
+                           that we should expect; if this is not specified,
+                           then EOF is expected (i.e. the shell is completely
+                           closed after the exit command is issued)
+        :param timeout: Timeout in seconds.  If this timeout is exceeded,
+                        then an exception is raised.
+        :return: An EOF returns -1, a regex metch returns 0 and a match in a
+                 list of regexes returns the index of the matched string in
+                 the list.
+        :raises: An exception is raised on timeout.
         """
 
         # Set the channel timeout
@@ -105,7 +99,7 @@ class SSHClientInteraction:
         # This function needs all regular expressions to be in the form of a
         # list, so if the user provided a string, let's convert it to a 1
         # item list.
-        if len(re_strings) != 0 and isinstance(re_strings, str):
+        if isinstance(re_strings, str) and len(re_strings) != 0:
             re_strings = [re_strings]
 
         # Loop until one of the expressions is matched or loop forever if
@@ -117,7 +111,6 @@ class SSHClientInteraction:
                  if re.match('.*\n' + re_string + '$',
                              self.current_output, re.DOTALL)]
         ):
-
             # Read some of the output
             buffer = self.channel.recv(self.buffer_size)
 
@@ -145,13 +138,14 @@ class SSHClientInteraction:
                              if re.match('.*\n' + re_string + '$',
                                          self.current_output, re.DOTALL)]
 
-        self.current_output_clean = self.current_output
-
         # Clean the output up by removing the sent command
+        self.current_output_clean = self.current_output
         if len(self.current_send_string) != 0:
             self.current_output_clean = (
                 self.current_output_clean.replace(
-                    self.current_send_string + '\n', ''))
+                    self.current_send_string + '\n', ''
+                )
+            )
 
         # Reset the current send string to ensure that multiple expect calls
         # don't result in bad output cleaning
@@ -162,7 +156,8 @@ class SSHClientInteraction:
         if len(re_strings) != 0:
             self.current_output_clean = (
                 re.sub(found_pattern[0][1] + '$', '',
-                       self.current_output_clean))
+                       self.current_output_clean)
+            )
             self.last_match = found_pattern[0][1]
             return found_pattern[0][0]
         else:
@@ -171,26 +166,27 @@ class SSHClientInteraction:
             return -1
 
     def send(self, send_string):
-        """Saves and sends the send string provided"""
+        """Saves and sends the send string provided."""
         self.current_send_string = send_string
         self.channel.send(send_string + self.newline)
 
     def tail(self, line_prefix=None, callback=None):
-        """This function takes control of an SSH channel and displays line
+        """
+        This function takes control of an SSH channel and displays line
         by line of output as \n is recieved.  This function is specifically
         made for tail-like commands.
 
-        Keyword arguments:
-        line_prefix -- Text to append to the left of each line of output.
-                       This is especially useful if you are using my
-                       MultiSSH class to run tail commands over multiple
-                       servers.
-        callback -- You may optionally supply a callback function which
-                    takes two paramaters.  The first is the line prefix
-                    and the second is current line of output. The
-                    callback should return the string that is to be
-                    displayed (including the \n character).  This allows
-                    users to grep the output or manipulate it as required.
+        :param line_prefix: Text to append to the left of each line of output.
+                            This is especially useful if you are using my
+                            MultiSSH class to run tail commands over multiple
+                            servers.
+        :param callback: You may optionally supply a callback function which
+                         takes two paramaters.  The first is the line prefix
+                         and the second is current line of output. The
+                         callback should return the string that is to be
+                         displayed (including the \n character).  This allows
+                         users to grep the output or manipulate it as
+                         required.
         """
 
         # Set the channel timeout to the maximum integer the server allows,
@@ -234,9 +230,11 @@ class SSHClientInteraction:
                 current_line = ''
 
     def take_control(self):
-        """This function is a better documented and touched up version of the
+        """
+        This function is a better documented and touched up version of the
         posix_shell function found in the interactive.py demo script that
-        ships with Paramiko"""
+        ships with Paramiko.
+        """
 
         if has_termios:
             # Get attributes of the shell you were in before going to the
