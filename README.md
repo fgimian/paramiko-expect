@@ -30,8 +30,9 @@ interact.send('uname -a')
 interact.expect(prompt)
 cmd_output_uname = interact.current_output_clean
 
-# Now let's do the same for the ls command
-interact.send('ls -l /')
+# Now let's do the same for the ls command but also set a timeout for this
+# specific send (overriding the default timeout value)
+interact.send('ls -l /', timeout=5)
 interact.expect(prompt)
 cmd_output_ls = interact.current_output_clean
 
