@@ -11,6 +11,8 @@
 #
 # You must have Paramiko installed in order to use this library.
 #
+from __future__ import unicode_literals
+
 import sys
 import re
 import socket
@@ -41,17 +43,19 @@ class SSHClientInteraction(object):
     :param display: Whether or not the output should be displayed in
                     real-time as it is being performed (especially useful
                     when debugging)
+    :param encoding: The character encoding to use.
     """
 
     def __init__(
         self, client, timeout=60, newline='\r', buffer_size=1024,
-        display=False
+        display=False, encoding='utf-8'
     ):
         self.channel = client.invoke_shell()
         self.timeout = timeout
         self.newline = newline
         self.buffer_size = buffer_size
         self.display = display
+        self.encoding = encoding
 
         self.current_output = ''
         self.current_output_clean = ''
@@ -112,24 +116,27 @@ class SSHClientInteraction(object):
                              self.current_output, re.DOTALL)]
         ):
             # Read some of the output
-            buffer = self.channel.recv(self.buffer_size)
+            current_buffer = self.channel.recv(self.buffer_size)
 
             # If we have an empty buffer, then the SSH session has been closed
-            if len(buffer) == 0:
+            if len(current_buffer) == 0:
                 break
+
+            # Convert the buffer to our chosen encoding
+            current_buffer_decoded = current_buffer.decode(self.encoding)
 
             # Strip all ugly \r (Ctrl-M making) characters from the current
             # read
-            buffer = buffer.replace('\r', '')
+            current_buffer_decoded = current_buffer_decoded.replace('\r', '')
 
             # Display the current buffer in realtime if requested to do so
             # (good for debugging purposes)
             if self.display:
-                sys.stdout.write(buffer)
+                sys.stdout.write(current_buffer_decoded)
                 sys.stdout.flush()
 
             # Add the currently read buffer to the output
-            self.current_output += buffer
+            self.current_output += current_buffer_decoded
 
         # Grab the first pattern that was matched
         if len(re_strings) != 0:
@@ -155,8 +162,9 @@ class SSHClientInteraction(object):
         # requested and save the details of the matched pattern
         if len(re_strings) != 0:
             self.current_output_clean = (
-                re.sub(found_pattern[0][1] + '$', '',
-                       self.current_output_clean)
+                re.sub(
+                    found_pattern[0][1] + '$', '', self.current_output_clean
+                )
             )
             self.last_match = found_pattern[0][1]
             return found_pattern[0][0]
@@ -251,7 +259,8 @@ class SSHClientInteraction(object):
                 # Loop forever until the user exits (i.e. read buffer is empty)
                 while True:
                     select_read, select_write, select_exception = (
-                        select.select([self.channel, sys.stdin], [], []))
+                        select.select([self.channel, sys.stdin], [], [])
+                    )
                     # Read any output from the terminal and print it to the
                     # screen.  With timeout set to 0, we just can ignore times
                     # when there's nothing to receive.
