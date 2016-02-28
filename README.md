@@ -31,9 +31,9 @@ interact.expect(prompt)
 cmd_output_uname = interact.current_output_clean
 
 # Now let's do the same for the ls command but also set a timeout for this
-# specific send (overriding the default timeout value)
-interact.send('ls -l /', timeout=5)
-interact.expect(prompt)
+# specific expect (overriding the default timeout)
+interact.send('ls -l /')
+interact.expect(prompt, timeout=5)
 cmd_output_ls = interact.current_output_clean
 
 # To expect multiple expressions, just use a list.  You can also selectively

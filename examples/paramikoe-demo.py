@@ -14,7 +14,6 @@ from paramikoe import SSHClientInteraction
 
 
 def main():
-
     # Set login credentials and the server prompt
     hostname = 'localhost'
     username = 'fots'
@@ -23,7 +22,6 @@ def main():
 
     # Use SSH client to login
     try:
-
         # Create a new SSH client object
         client = paramiko.SSHClient()
 
@@ -45,9 +43,9 @@ def main():
         cmd_output_uname = interact.current_output_clean
 
         # Now let's do the same for the ls command but also set a timeout for
-        # this specific send (overriding the default timeout)
-        interact.send('ls -l /', timeout=5)
-        interact.expect(prompt)
+        # this specific expect (overriding the default timeout)
+        interact.send('ls -l /')
+        interact.expect(prompt, timeout=5)
         cmd_output_ls = interact.current_output_clean
 
         # To expect multiple expressions, just use a list.  You can also

@@ -14,7 +14,6 @@ from paramikoe import SSHClientInteraction
 
 
 def main():
-
     # Set login credentials and the server prompt
     hostname = 'localhost'
     username = 'fots'
@@ -23,7 +22,6 @@ def main():
 
     # Use SSH client to login
     try:
-
         # Create a new SSH client object
         client = paramiko.SSHClient()
 

@@ -27,7 +27,7 @@ except ImportError:
 import select
 
 
-class SSHClientInteraction:
+class SSHClientInteraction(object):
     """
     This class allows an expect-like interface to Paramiko which allows
     coders to interact with applications and the shell of the connected
@@ -86,7 +86,7 @@ class SSHClientInteraction:
         :return: An EOF returns -1, a regex metch returns 0 and a match in a
                  list of regexes returns the index of the matched string in
                  the list.
-        :raises: An exception is raised on timeout.
+        :raises: A socket.timeout exception is raised on timeout.
         """
 
         # Set the channel timeout
