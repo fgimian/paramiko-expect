@@ -207,7 +207,7 @@ class SSHClientInteraction(object):
         self.channel.settimeout(timeout)
 
         # Create an empty line buffer and a line counter
-        current_line_bytes = []
+        current_bytes = []
         line_counter = 0
         line_feed_byte = '\n'.encode('utf-8')
 
@@ -222,14 +222,14 @@ class SSHClientInteraction(object):
                 break
 
             # Add the currently read buffer to the current line output
-            current_line_bytes.append(single_byte)
+            current_bytes.append(single_byte)
 
             # Display the last read line in realtime when we reach a \n
             # character
             if single_byte == line_feed_byte:
                 # prepare line for output
-                output_line_bytes = b' '.join(current_line_bytes)
-                output_line_str = output_line.decode('utf-8')    
+                output_line_bytes = b' '.join(current_bytes)
+                output_line_str = output_line_bytes.decode('utf-8')    
                 
                 # Strip all ugly \r (Ctrl-M making) characters from the current
                 # line
@@ -244,7 +244,7 @@ class SSHClientInteraction(object):
                         sys.stdout.write(output_line_str)
                 sys.stdout.flush()
                 line_counter += 1
-                current_line_bytes = []
+                current_bytes = []
 
     def take_control(self):
         """
