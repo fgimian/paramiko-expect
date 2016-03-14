@@ -179,7 +179,7 @@ class SSHClientInteraction(object):
         self.current_send_string = send_string
         self.channel.send(send_string + self.newline)
 
-    def tail(self, line_prefix=None, callback=None):
+    def tail(self, line_prefix=None, callback=None, timeout=None):
         """
         This function takes control of an SSH channel and displays line
         by line of output as \n is recieved.  This function is specifically
@@ -201,8 +201,10 @@ class SSHClientInteraction(object):
         # Set the channel timeout to the maximum integer the server allows,
         # setting this to None breaks the KeyboardInterrupt exception and
         # won't allow us to Ctrl+C out of the script
-        platform_c_maxint = 2 ** (struct.Struct('i').size * 8 - 1) - 1  
-        self.channel.settimeout(platform_c_maxint)
+        if timeout is None:
+            platform_c_maxint = 2 ** (struct.Struct('i').size * 8 - 1) - 1  
+            timeout = platform_c_maxint
+        self.channel.settimeout(timeout)
 
         # Create an empty line buffer and a line counter
         current_line = ''
