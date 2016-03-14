@@ -228,7 +228,7 @@ class SSHClientInteraction(object):
             # character
             if single_byte == line_feed_byte:
                 # prepare line for output
-                output_line_bytes = b' '.join(current_bytes)
+                output_line_bytes = b''.join(current_bytes)
                 output_line_str = output_line_bytes.decode('utf-8')    
                 
                 # Strip all ugly \r (Ctrl-M making) characters from the current
@@ -236,7 +236,9 @@ class SSHClientInteraction(object):
                 output_line_str = output_line_str.replace('\r', '')                
                 
                 if line_counter and callback:
-                    sys.stdout.write(callback(line_prefix, output_line_str))
+                    value  = callback(line_prefix, output_line_str)
+                    if value is not None:
+                        sys.stdout.write(value)
                 else:
                     if line_counter and line_prefix:
                         sys.stdout.write(line_prefix)
