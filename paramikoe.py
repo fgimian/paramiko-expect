@@ -207,39 +207,44 @@ class SSHClientInteraction(object):
         self.channel.settimeout(timeout)
 
         # Create an empty line buffer and a line counter
-        current_line = ''
+        current_line_bytes = []
         line_counter = 0
+        line_feed_byte = '\n'.encode('utf-8')
 
         # Loop forever, Ctrl+C (KeyboardInterrupt) is used to break the tail
         while True:
 
             # Read the output one byte at a time so we can detect \n correctly
-            buffer = self.channel.recv(1)
+            single_byte = self.channel.recv(1)
 
             # If we have an empty buffer, then the SSH session has been closed
-            if len(buffer) == 0:
+            if len(single_byte) == 0:
                 break
 
-            # Strip all ugly \r (Ctrl-M making) characters from the current
-            # read
-            buffer = buffer.replace('\r', '')
-
             # Add the currently read buffer to the current line output
-            current_line += buffer
+            current_line_bytes.append(single_byte)
 
             # Display the last read line in realtime when we reach a \n
             # character
-            if current_line.endswith('\n'):
+            if single_byte == line_feed_byte:
+                # prepare line for output
+                output_line_bytes = b' '.join(current_line_bytes)
+                output_line_str = output_line.decode('utf-8')    
+                
+                # Strip all ugly \r (Ctrl-M making) characters from the current
+                # line
+                output_line_str = output_line_str.replace('\r', '')                
+                
                 if line_counter and callback:
-                    sys.stdout.write(callback(line_prefix, current_line))
+                    sys.stdout.write(callback(line_prefix, output_line_str))
                 else:
                     if line_counter and line_prefix:
                         sys.stdout.write(line_prefix)
                     if line_counter:
-                        sys.stdout.write(current_line)
+                        sys.stdout.write(output_line_str)
                 sys.stdout.flush()
                 line_counter += 1
-                current_line = ''
+                current_line_bytes = []
 
     def take_control(self):
         """
