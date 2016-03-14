@@ -16,6 +16,7 @@ from __future__ import unicode_literals
 import sys
 import re
 import socket
+import struct
 
 # Windows does not have termios
 try:
@@ -199,8 +200,9 @@ class SSHClientInteraction(object):
 
         # Set the channel timeout to the maximum integer the server allows,
         # setting this to None breaks the KeyboardInterrupt exception and
-        # won't allow us to Ctrl+C out of teh script
-        self.channel.settimeout(sys.maxint)
+        # won't allow us to Ctrl+C out of the script
+        platform_c_maxint = 2 ** (struct.Struct('i').size * 8 - 1) - 1  
+        self.channel.settimeout(platform_c_maxint)
 
         # Create an empty line buffer and a line counter
         current_line = ''
