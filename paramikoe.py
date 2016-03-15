@@ -16,6 +16,7 @@ from __future__ import unicode_literals
 import sys
 import re
 import socket
+import struct
 
 # Windows does not have termios
 try:
@@ -178,7 +179,7 @@ class SSHClientInteraction(object):
         self.current_send_string = send_string
         self.channel.send(send_string + self.newline)
 
-    def tail(self, line_prefix=None, callback=None):
+    def tail(self, line_prefix=None, callback=None, timeout=None):
         """
         This function takes control of an SSH channel and displays line
         by line of output as \n is recieved.  This function is specifically
@@ -199,43 +200,53 @@ class SSHClientInteraction(object):
 
         # Set the channel timeout to the maximum integer the server allows,
         # setting this to None breaks the KeyboardInterrupt exception and
-        # won't allow us to Ctrl+C out of teh script
-        self.channel.settimeout(sys.maxint)
+        # won't allow us to Ctrl+C out of the script
+        if timeout is None:
+            platform_c_maxint = 2 ** (struct.Struct('i').size * 8 - 1) - 1  
+            timeout = platform_c_maxint
+        self.channel.settimeout(timeout)
 
         # Create an empty line buffer and a line counter
-        current_line = ''
+        current_bytes = []
         line_counter = 0
+        line_feed_byte = '\n'.encode('utf-8')
 
         # Loop forever, Ctrl+C (KeyboardInterrupt) is used to break the tail
         while True:
 
             # Read the output one byte at a time so we can detect \n correctly
-            buffer = self.channel.recv(1)
+            single_byte = self.channel.recv(1)
 
             # If we have an empty buffer, then the SSH session has been closed
-            if len(buffer) == 0:
+            if len(single_byte) == 0:
                 break
 
-            # Strip all ugly \r (Ctrl-M making) characters from the current
-            # read
-            buffer = buffer.replace('\r', '')
-
             # Add the currently read buffer to the current line output
-            current_line += buffer
+            current_bytes.append(single_byte)
 
             # Display the last read line in realtime when we reach a \n
             # character
-            if current_line.endswith('\n'):
+            if single_byte == line_feed_byte:
+                # prepare line for output
+                output_line_bytes = b''.join(current_bytes)
+                output_line_str = output_line_bytes.decode('utf-8')    
+                
+                # Strip all ugly \r (Ctrl-M making) characters from the current
+                # line
+                output_line_str = output_line_str.replace('\r', '')                
+                
                 if line_counter and callback:
-                    sys.stdout.write(callback(line_prefix, current_line))
+                    value  = callback(line_prefix, output_line_str)
+                    if value is not None:
+                        sys.stdout.write(value)
                 else:
                     if line_counter and line_prefix:
                         sys.stdout.write(line_prefix)
                     if line_counter:
-                        sys.stdout.write(current_line)
+                        sys.stdout.write(output_line_str)
                 sys.stdout.flush()
                 line_counter += 1
-                current_line = ''
+                current_bytes = []
 
     def take_control(self):
         """
