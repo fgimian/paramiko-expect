@@ -30,7 +30,7 @@ To install paramiko-expect, simply run the following at your prompt:
 
 So let's check out how it works in general (please see
 `paramikoe-demo.py <https://github.com/fgimian/paramiko-expect/blob/master/examples/paramikoe-demo.py>`_
-under the **examples** directory for the complete code):
+for the complete code):
 
 .. code:: python
 
@@ -85,7 +85,7 @@ under the **examples** directory for the complete code):
 
 **Important**: Before running this script, be sure to place
 `paramikoe-demo-helper.py <https://github.com/fgimian/paramiko-expect/blob/master/examples/paramikoe-demo-helper.py>`_
-from the **examples** directory in ``~``.
+in ``~``.
 
 The print statements at the bottom of the script provide the following
 output:
