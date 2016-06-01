@@ -9,6 +9,9 @@ Paramiko Expect
 .. image:: https://raw.githubusercontent.com/fgimian/paramiko-expect/master/images/paramiko-expect-logo.png
    :alt: Paramiko Expect Logo
 
+Artwork courtesy of `Open Clip Art
+Library <https://openclipart.org/detail/174780/openmouthed-robot>`_
+
 Introduction
 ------------
 
