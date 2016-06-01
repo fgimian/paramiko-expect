@@ -147,7 +147,7 @@ for the complete code):
     interact.tail(line_prefix=hostname+': ')
 
 The true power of the tail function will become more apparent when you
-check out the `Multi-SSH <https://github.com/fgimian/multi-ssh>`__
+check out the `Multi-SSH <https://github.com/fgimian/multissh>`__
 library. Ever thought about tailing a log on multiple servers? Well
 dream no more my friend, it's here!
 
