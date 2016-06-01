@@ -32,7 +32,7 @@ To install paramiko-expect, simply run the following at your prompt:
     pip install git+https://github.com/fgimian/paramiko-expect.git
 
 So let's check out how it works in general (please see
-`paramikoe-demo.py <https://github.com/fgimian/paramiko-expect/blob/master/examples/paramikoe-demo.py>`_
+`paramiko_expect-demo.py <https://github.com/fgimian/paramiko-expect/blob/master/examples/paramiko_expect-demo.py>`_
 for the complete code):
 
 .. code:: python
@@ -60,14 +60,14 @@ for the complete code):
     # take action based on what was matched.
 
     # Method 1: You may use the last_match property to find out what was matched
-    interact.send('~/paramikoe-demo-helper.py')
+    interact.send('~/paramiko_expect-demo-helper.py')
     interact.expect([prompt, 'Please enter your name: '])
     if interact.last_match == 'Please enter your name: ':
         interact.send('Fotis Gimian')
         interact.expect(prompt)
 
     # Method 2: You may use the matched index to determine the last match (like pexpect)
-    interact.send('~/paramikoe-demo-helper.py')
+    interact.send('~/paramiko_expect-demo-helper.py')
     found_index = interact.expect([prompt, 'Please enter your name: '])
     if found_index == 1:
         interact.send('Fotis Gimian')
@@ -87,7 +87,7 @@ for the complete code):
     print cmd_output_ls
 
 **Important**: Before running this script, be sure to place
-`paramikoe-demo-helper.py <https://github.com/fgimian/paramiko-expect/blob/master/examples/paramikoe-demo-helper.py>`_
+`paramiko_expect-demo-helper.py <https://github.com/fgimian/paramiko-expect/blob/master/examples/paramiko_expect-demo-helper.py>`_
 in ``~``.
 
 The print statements at the bottom of the script provide the following
@@ -128,7 +128,7 @@ output:
     lrwxrwxrwx  1 root root    29 May  1 22:18 vmlinuz -> boot/vmlinuz-3.2.0-23-generic
 
 For interacting with tail-like scripts, we can use the tail function (please see
-`paramikoe-tail-demo.py <https://github.com/fgimian/paramiko-expect/blob/master/examples/paramikoe-tail-demo.py>`_
+`paramiko_expect-tail-demo.py <https://github.com/fgimian/paramiko-expect/blob/master/examples/paramiko_expect-tail-demo.py>`_
 for the complete code):
 
 .. code:: python

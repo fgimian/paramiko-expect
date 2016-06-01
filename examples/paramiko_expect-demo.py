@@ -10,7 +10,7 @@
 #
 import traceback
 import paramiko
-from paramikoe import SSHClientInteraction
+from paramiko_expect import SSHClientInteraction
 
 
 def main():
@@ -53,7 +53,7 @@ def main():
 
         # Method 1: You may use the last_match property to find out what was
         # matched
-        interact.send('~/paramikoe-demo-helper.py')
+        interact.send('~/paramiko_expect-demo-helper.py')
         interact.expect([prompt, 'Please enter your name: '])
         if interact.last_match == 'Please enter your name: ':
             interact.send('Fotis Gimian')
@@ -61,7 +61,7 @@ def main():
 
         # Method 2: You may use the matched index to determine the last match
         # (like pexpect)
-        interact.send('~/paramikoe-demo-helper.py')
+        interact.send('~/paramiko_expect-demo-helper.py')
         found_index = interact.expect([prompt, 'Please enter your name: '])
         if found_index == 1:
             interact.send('Fotis Gimian')

@@ -16,7 +16,7 @@ setup(
     description='An expect-like extension for the Paramiko SSH library',
     long_description=long_description,
     platforms='Posix',
-    py_modules=['paramikoe'],
+    py_modules=['paramiko_expect'],
     install_requires=[
         'paramiko>=1.10.1',
     ],

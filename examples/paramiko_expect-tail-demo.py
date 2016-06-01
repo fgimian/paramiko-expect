@@ -10,7 +10,7 @@
 #
 import traceback
 import paramiko
-from paramikoe import SSHClientInteraction
+from paramiko_expect import SSHClientInteraction
 
 
 def main():

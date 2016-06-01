@@ -5,7 +5,7 @@
 # Written by Fotis Gimian
 # http://github.com/fgimian
 #
-# This interactive script is used to help demonstrate the paramikoe-demo.py
+# This interactive script is used to help demonstrate the paramiko_expect-demo.py
 # script
 #
 
