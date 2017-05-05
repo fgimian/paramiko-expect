@@ -13,8 +13,8 @@ python:
 - pypy-5.3.1
 install:
 - pip install .
-- pip install -r requirements.txt
-script: pytest
+- docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  macropin/sshd
+script: pytest -s
 deploy:
   provider: pypi
   user: fruch
