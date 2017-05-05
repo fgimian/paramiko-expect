@@ -3,8 +3,21 @@ Paramiko Expect
 
 |License|
 
-.. |License| image:: https://img.shields.io/badge/license-MIT-blue.svg
+.. |License| image:: https://img.shields.io/pypi/l/paramiko-expect.svg
    :target: https://github.com/fgimian/paramiko-expect/blob/master/LICENSE
+
+.. |Coverage| image:: https://coveralls.io/repos/github/fgimian/paramiko-expect/badge.svg?branch=test-travis
+   :target: https://coveralls.io/github/fgimian/paramiko-expect?branch=test-travis
+
+.. |Build| image:: https://img.shields.io/travis/fgimian/paramiko-expect.svg   
+   :target: https://travis-ci.org/fruch/paramiko-expect/
+
+.. |pypi version| image:: https://img.shields.io/pypi/v/paramiko-expect.svg   
+   :target: https://pypi.python.org/pypi/paramiko-expect/
+
+.. |Python Versions| image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg   
+   :target:  https://pypi.python.org/pypi/paramiko-expect/
+
 
 .. image:: https://raw.githubusercontent.com/fgimian/paramiko-expect/master/images/paramiko-expect-logo.png
    :alt: Paramiko Expect Logo
@@ -150,6 +163,18 @@ The true power of the tail function will become more apparent when you
 check out the `Multi-SSH <https://github.com/fgimian/multissh>`_
 library. Ever thought about tailing a log on multiple servers? Well
 dream no more my friend, it's here!
+
+
+Tests
+-----
+Not full coverage yet, and assumes you have docker setup:
+
+.. code:: bash
+
+    pip install -r requirements-test.txt
+    docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  macropin/sshd
+    pytest -s --cov paramiko_expect --cov-report term-missing
+
 
 License
 -------

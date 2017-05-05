@@ -1,0 +1,27 @@
+sudo: required
+services:
+- docker
+language: python
+python:
+- '2.6'
+- '2.7'
+- '3.3'
+- '3.4'
+- '3.5'
+- '3.6'
+- pypy
+install:
+- pip install .
+- pip install -r requirements-test.txt
+- docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  macropin/sshd
+script: pytest -s --cov paramiko_expect --cov-report term-missing
+after_success: coveralls
+deploy:
+  provider: pypi
+  user: fruch
+  password:
+    secure: J5q1j/+ythTT1//ZUIi21gXcJs0+Jq5jMMtqP06HCVQ9MqP+jw0k7okCFIizZUb40iZbKZmgggaGHtpbMJ9P7upiZHjaHU9Slh2NrAA4T8oTx4Bj3I+Kv8JvI9A0wnwiriNXxkaX2T0NtJzmjfWIuhJQXK6FoQ2LT4Uu+E1KVdg=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: fgimian/paramiko-expect
