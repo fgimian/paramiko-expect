@@ -6,6 +6,19 @@ Paramiko Expect
 .. |License| image:: https://img.shields.io/badge/license-MIT-blue.svg
    :target: https://github.com/fgimian/paramiko-expect/blob/master/LICENSE
 
+.. image:: https://coveralls.io/repos/github/fruch/paramiko-expect/badge.svg?branch=test-travis
+   :target: https://coveralls.io/github/fruch/paramiko-expect?branch=test-travis
+
+.. image:: https://img.shields.io/travis/fruch/paramiko-expect.svg   
+   :target: https://travis-ci.org/fruch/paramiko-expect/
+
+.. image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg   
+   :target: https://pypi.python.org/pypi/paramiko-expect/
+
+.. image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg   
+   :target:  https://pypi.python.org/pypi/paramiko-expect/
+
+
 .. image:: https://raw.githubusercontent.com/fgimian/paramiko-expect/master/images/paramiko-expect-logo.png
    :alt: Paramiko Expect Logo
 
