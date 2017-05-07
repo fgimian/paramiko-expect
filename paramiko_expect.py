@@ -200,7 +200,7 @@ class SSHClientInteraction(object):
         # Set the channel timeout to the maximum integer the server allows,
         # setting this to None breaks the KeyboardInterrupt exception and
         # won't allow us to Ctrl+C out of teh script
-        self.channel.settimeout(sys.maxint)
+        self.channel.settimeout(sys.maxsize)
 
         # Create an empty line buffer and a line counter
         current_line = ''
