@@ -6,15 +6,6 @@ Paramiko Expect
 .. |License| image:: https://img.shields.io/badge/license-MIT-blue.svg
    :target: https://github.com/fgimian/paramiko-expect/blob/master/LICENSE
 
-.. image:: https://raw.githubusercontent.com/fgimian/paramiko-expect/master/images/paramiko-expect-logo.png
-   :alt: Paramiko Expect Logo
-
-Artwork courtesy of `Open Clip Art
-Library <https://openclipart.org/detail/174780/openmouthed-robot>`_
-
-Introduction
-------------
-
 .. image:: https://coveralls.io/repos/github/fruch/paramiko-expect/badge.svg?branch=test-travis
    :target: https://coveralls.io/github/fruch/paramiko-expect?branch=test-travis
 
@@ -23,6 +14,19 @@ Introduction
 
 .. image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg   
    :target: https://pypi.python.org/pypi/paramiko-expect/
+
+.. image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg   
+   :target:  https://pypi.python.org/pypi/paramiko-expect/
+
+
+.. image:: https://raw.githubusercontent.com/fgimian/paramiko-expect/master/images/paramiko-expect-logo.png
+   :alt: Paramiko Expect Logo
+
+Artwork courtesy of `Open Clip Art
+Library <https://openclipart.org/detail/174780/openmouthed-robot>`_
+
+Introduction
+------------
 
 Paramiko Expect provides an expect-like extension for the Paramiko SSH library
 which allows scripts to fully interact with hosts via a true SSH
