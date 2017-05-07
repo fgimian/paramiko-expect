@@ -10,8 +10,6 @@ python:
 - '3.5'
 - '3.6'
 - pypy
-- pypy3
-- pypy-5.3.1
 install:
 - pip install .
 - docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  macropin/sshd
