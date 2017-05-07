@@ -15,8 +15,8 @@ Library <https://openclipart.org/detail/174780/openmouthed-robot>`_
 Introduction
 ------------
 
-.. image:: https://coveralls.io/repos/github/fruch/paramiko-expect/badge.svg?branch=master
-   :target: https://coveralls.io/github/fruch/paramiko-expect?branch=master
+.. image:: https://coveralls.io/repos/github/fruch/paramiko-expect/badge.svg?branch=test-travis
+   :target: https://coveralls.io/github/fruch/paramiko-expect?branch=test-travis
 
 .. image:: https://img.shields.io/travis/fruch/paramiko-expect.svg   
    :target: https://travis-ci.org/fruch/paramiko-expect/
