@@ -8,7 +8,7 @@ with open('README.rst') as f:
 
 setup(
     name='paramiko-expect',
-    version='0.2.2',
+    version='0.2.3',
     url='https://github.com/fgimian/paramiko-expect',
     license='MIT',
     author='Fotis Gimian',
@@ -21,7 +21,7 @@ setup(
         'paramiko>=1.10.1',
     ],
     classifiers=[
-        'Development Status :: 4 - Beta'
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
