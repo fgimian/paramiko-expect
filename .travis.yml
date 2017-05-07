@@ -12,8 +12,12 @@ python:
 - pypy
 install:
 - pip install .
+- pip install -r requirements-test.txt
 - docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  macropin/sshd
-script: pytest -s
+
+script: pytest -s --cov paramiko_expect
+after_success: coveralls
+
 deploy:
   provider: pypi
   user: fruch

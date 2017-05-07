@@ -15,6 +15,11 @@ Library <https://openclipart.org/detail/174780/openmouthed-robot>`_
 Introduction
 ------------
 
+.. image:: https://coveralls.io/repos/github/fruch/paramiko-expect/badge.svg?branch=master
+:target: https://coveralls.io/github/fruch/paramiko-expect?branch=master
+
+.. image:: https://img.shields.io/travis/fruch/paramiko-expect.svg   :target: 
+
 Paramiko Expect provides an expect-like extension for the Paramiko SSH library
 which allows scripts to fully interact with hosts via a true SSH
 connection.
