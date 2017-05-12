@@ -1,21 +1,19 @@
 Paramiko Expect
 ===============
 
-|License|
-
-.. |License| image:: https://img.shields.io/pypi/l/paramiko-expect.svg
+.. image:: https://img.shields.io/pypi/l/paramiko-expect.svg
    :target: https://github.com/fgimian/paramiko-expect/blob/master/LICENSE
 
-.. |Coverage| image:: https://coveralls.io/repos/github/fgimian/paramiko-expect/badge.svg?branch=test-travis
+.. image:: https://coveralls.io/repos/github/fgimian/paramiko-expect/badge.svg?branch=test-travis
    :target: https://coveralls.io/github/fgimian/paramiko-expect?branch=test-travis
 
-.. |Build| image:: https://img.shields.io/travis/fgimian/paramiko-expect.svg   
+.. image:: https://img.shields.io/travis/fgimian/paramiko-expect.svg   
    :target: https://travis-ci.org/fruch/paramiko-expect/
 
-.. |pypi version| image:: https://img.shields.io/pypi/v/paramiko-expect.svg   
+.. image:: https://img.shields.io/pypi/v/paramiko-expect.svg   
    :target: https://pypi.python.org/pypi/paramiko-expect/
 
-.. |Python Versions| image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg   
+.. image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg   
    :target:  https://pypi.python.org/pypi/paramiko-expect/
 
 
