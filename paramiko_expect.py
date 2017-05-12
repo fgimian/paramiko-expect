@@ -65,6 +65,12 @@ class SSHClientInteraction(object):
     def __del__(self):
         self.close()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
     def close(self):
         """Attempts to close the channel for clean completion."""
         try:

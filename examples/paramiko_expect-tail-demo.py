@@ -16,9 +16,9 @@ from paramiko_expect import SSHClientInteraction
 def main():
     # Set login credentials and the server prompt
     hostname = 'localhost'
-    username = 'fots'
-    password = 'password'
-    prompt = 'fots@fotsies-ubuntu-testlab:~\$ '
+    username = 'vagrant'
+    password = 'vagrant'
+    prompt = 'vagrant@paramiko-expect-dev:~\$\s+'
 
     # Use SSH client to login
     try:
@@ -37,7 +37,7 @@ def main():
         interact.expect(prompt)
 
         # Send the tail command
-        interact.send('tail -f /var/log/auth.log')
+        interact.send('tail -f /var/log/syslog')
 
         # Now let the class tail the file for us
         interact.tail(line_prefix=hostname+': ')
