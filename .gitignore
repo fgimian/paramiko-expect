@@ -5,3 +5,4 @@ dist
 .project
 .pydevproject
 .vagrant
+.settings
