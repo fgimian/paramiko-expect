@@ -1,3 +1,5 @@
+import signal
+
 import pytest
 import paramiko
 from paramiko_expect import SSHClientInteraction
@@ -20,6 +22,8 @@ def interact(request):
         interact.send('exit')
         interact.expect()
         
+        interact.close()
+
     request.addfinalizer(fin)
     return interact
 
@@ -30,6 +34,9 @@ def test_01_install_python(interact):
     interact.expect(prompt, timeout=120)
 
     interact.send('apk add python')
+    interact.expect(prompt, timeout=120)
+
+    interact.send('apk add curl')
     interact.expect(prompt, timeout=120)
 
 def test_02_test_other_commnads(interact):
@@ -45,3 +52,21 @@ def test_03_test_demo_helper(interact):
 
     interact.send('Fotis Gimian')
     interact.expect(prompt)
+
+def test_04_tail(interact):
+
+    interact.send('curl -v https://httpbin.org/stream/100')
+
+    def signal_handler(signum, frame):
+        raise Exception("Timeout!")
+    
+    signal.signal(signal.SIGALRM, signal_handler)
+    
+    signal.alarm(2)   # Three seconds
+
+    try:
+        interact.tail()
+    except Exception as msg:
+        print(msg)
+
+    signal.alarm(0)    # reset
