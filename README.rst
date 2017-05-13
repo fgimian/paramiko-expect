@@ -181,8 +181,9 @@ Not full coverage yet, and assumes you have docker setup:
 
 Contributions
 -------------
-Israel Fruchter (@fruch) - Tests / CI / Uploads to Pypi
-Kiseok Kim (@kiseok7) - Vagrent image
+
+- Israel Fruchter (@fruch) - Tests / CI / Uploads to Pypi
+- Kiseok Kim (@kiseok7) - Vagrent image
 
 
 License
