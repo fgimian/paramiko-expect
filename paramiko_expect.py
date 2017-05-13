@@ -29,7 +29,7 @@ except ImportError:
 import select
 
 
-def print_stdout(msg):
+def default_output_func(msg):
     sys.stdout.write(msg)
     sys.stdout.flush()
 
@@ -53,7 +53,7 @@ class SSHClientInteraction(object):
 
     def __init__(
         self, client, timeout=60, newline='\r', buffer_size=1024,
-        display=False, encoding='utf-8'
+        display=False, encoding='utf-8', output_callback=default_output_func
     ):
         self.channel = client.invoke_shell()
         self.timeout = timeout
@@ -61,6 +61,7 @@ class SSHClientInteraction(object):
         self.buffer_size = buffer_size
         self.display = display
         self.encoding = encoding
+        self.output_callback = output_callback
 
         self.current_output = ''
         self.current_output_clean = ''
@@ -83,7 +84,7 @@ class SSHClientInteraction(object):
         except:
             pass
 
-    def expect(self, re_strings='', timeout=None, print_f=print_stdout):
+    def expect(self, re_strings='', timeout=None, output_callback=None):
         """
         This function takes in a regular expression (or regular expressions)
         that represent the last line of output from the server.  The function
@@ -98,15 +99,16 @@ class SSHClientInteraction(object):
                            closed after the exit command is issued)
         :param timeout: Timeout in seconds.  If this timeout is exceeded,
                         then an exception is raised.
-        :param print_f: A function used to print ssh output. Printed to stdout
+        :param output_callback: A function used to print ssh output. Printed to stdout
                         by default. A user-defined logger may be passed like
-                        print_f=lambda m: mylog.debug(m)
+                        output_callback=lambda m: mylog.debug(m)
         :return: An EOF returns -1, a regex metch returns 0 and a match in a
                  list of regexes returns the index of the matched string in
                  the list.
         :raises: A socket.timeout exception is raised on timeout.
         """
 
+        output_callback = output_callback if output_callback else self.output_callback
         # Set the channel timeout
         timeout = timeout if timeout else self.timeout
         self.channel.settimeout(timeout)
@@ -146,7 +148,7 @@ class SSHClientInteraction(object):
             # Display the current buffer in realtime if requested to do so
             # (good for debugging purposes)
             if self.display:
-                print_f(current_buffer_decoded)
+                output_callback(current_buffer_decoded)
 
             # Add the currently read buffer to the output
             self.current_output += current_buffer_decoded
@@ -191,7 +193,7 @@ class SSHClientInteraction(object):
         self.current_send_string = send_string
         self.channel.send(send_string + self.newline)
 
-    def tail(self, line_prefix=None, callback=None, print_f=print_stdout):
+    def tail(self, line_prefix=None, callback=None, output_callback=None):
         """
         This function takes control of an SSH channel and displays line
         by line of output as \n is recieved.  This function is specifically
@@ -208,10 +210,12 @@ class SSHClientInteraction(object):
                          displayed (including the \n character).  This allows
                          users to grep the output or manipulate it as
                          required.
-        :param print_f: A function used to print ssh output. Printed to stdout
+        :param output_callback: A function used to print ssh output. Printed to stdout
                         by default. A user-defined logger may be passed like
-                        print_f=lambda m: mylog.debug(m)
+                        output_callback=lambda m: mylog.debug(m)
         """
+
+        output_callback = output_callback if output_callback else self.output_callback
 
         # Set the channel timeout to the maximum integer the server allows,
         # setting this to None breaks the KeyboardInterrupt exception and
@@ -244,11 +248,11 @@ class SSHClientInteraction(object):
             if current_line.endswith('\n'):
                 if line_counter:
                     if callback:
-                        print_f(callback(line_prefix, current_line))
+                        output_callback(callback(line_prefix, current_line))
                     else:
                         if line_prefix:
-                            print_f(line_prefix)
-                        print_f(current_line)
+                            output_callback(line_prefix)
+                        output_callback(current_line)
                 line_counter += 1
                 current_line = ''
 
