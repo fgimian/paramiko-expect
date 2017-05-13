@@ -1,4 +1,5 @@
 import signal
+import platform
 
 import pytest
 import paramiko
@@ -53,6 +54,9 @@ def test_03_test_demo_helper(interact):
     interact.send('Fotis Gimian')
     interact.expect(prompt)
 
+
+@pytest.mark.skipif(not platform.python_implementation() == "CPython",
+                    reason="Pypy seems to  have problems with the signal")
 def test_04_tail(interact):
 
     interact.send('curl -v https://httpbin.org/stream/100')
