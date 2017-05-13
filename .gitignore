@@ -2,3 +2,7 @@
 build
 dist
 *.egg-info
+.project
+.pydevproject
+.vagrant
+.settings
