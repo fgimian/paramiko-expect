@@ -165,6 +165,7 @@ dream no more my friend, it's here!
 
 Tests
 -----
+
 Not full coverage yet, and assumes you have docker setup:
 
 .. code:: bash
@@ -172,6 +173,12 @@ Not full coverage yet, and assumes you have docker setup:
     pip install -r requirements-test.txt
     docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  macropin/sshd
     pytest -s --cov paramiko_expect --cov-report term-missing
+
+
+Contributions
+-------------
+Israel Fruchter (@fruch) - Tests / CI / Uploads to Pypi
+Kiseok Kim (@kiseok7) - Vagrent image
 
 
 License
