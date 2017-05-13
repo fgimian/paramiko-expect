@@ -29,6 +29,11 @@ except ImportError:
 import select
 
 
+def print_stdout(msg):
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+
+
 class SSHClientInteraction(object):
     """
     This class allows an expect-like interface to Paramiko which allows
@@ -78,7 +83,7 @@ class SSHClientInteraction(object):
         except:
             pass
 
-    def expect(self, re_strings='', timeout=None):
+    def expect(self, re_strings='', timeout=None, print_f=print_stdout):
         """
         This function takes in a regular expression (or regular expressions)
         that represent the last line of output from the server.  The function
@@ -93,6 +98,9 @@ class SSHClientInteraction(object):
                            closed after the exit command is issued)
         :param timeout: Timeout in seconds.  If this timeout is exceeded,
                         then an exception is raised.
+        :param print_f: A function used to print ssh output. Printed to stdout
+                        by default. A user-defined logger may be passed like
+                        print_f=lambda m: mylog.debug(m)
         :return: An EOF returns -1, a regex metch returns 0 and a match in a
                  list of regexes returns the index of the matched string in
                  the list.
@@ -138,8 +146,7 @@ class SSHClientInteraction(object):
             # Display the current buffer in realtime if requested to do so
             # (good for debugging purposes)
             if self.display:
-                sys.stdout.write(current_buffer_decoded)
-                sys.stdout.flush()
+                print_f(current_buffer_decoded)
 
             # Add the currently read buffer to the output
             self.current_output += current_buffer_decoded
@@ -184,7 +191,7 @@ class SSHClientInteraction(object):
         self.current_send_string = send_string
         self.channel.send(send_string + self.newline)
 
-    def tail(self, line_prefix=None, callback=None):
+    def tail(self, line_prefix=None, callback=None, print_f=print_stdout):
         """
         This function takes control of an SSH channel and displays line
         by line of output as \n is recieved.  This function is specifically
@@ -201,6 +208,9 @@ class SSHClientInteraction(object):
                          displayed (including the \n character).  This allows
                          users to grep the output or manipulate it as
                          required.
+        :param print_f: A function used to print ssh output. Printed to stdout
+                        by default. A user-defined logger may be passed like
+                        print_f=lambda m: mylog.debug(m)
         """
 
         # Set the channel timeout to the maximum integer the server allows,
@@ -232,14 +242,13 @@ class SSHClientInteraction(object):
             # Display the last read line in realtime when we reach a \n
             # character
             if current_line.endswith('\n'):
-                if line_counter and callback:
-                    sys.stdout.write(callback(line_prefix, current_line))
-                else:
-                    if line_counter and line_prefix:
-                        sys.stdout.write(line_prefix)
-                    if line_counter:
-                        sys.stdout.write(current_line)
-                sys.stdout.flush()
+                if line_counter:
+                    if callback:
+                        print_f(callback(line_prefix, current_line))
+                    else:
+                        if line_prefix:
+                            print_f(line_prefix)
+                        print_f(current_line)
                 line_counter += 1
                 current_line = ''
 
