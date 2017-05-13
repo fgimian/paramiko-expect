@@ -40,6 +40,10 @@ To install paramiko-expect, simply run the following at your prompt:
 
 .. code:: bash
 
+    # from pypi
+    pip insall paramiko-expect
+
+    # from source
     pip install git+https://github.com/fgimian/paramiko-expect.git
 
 So let's check out how it works in general (please see
