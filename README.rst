@@ -4,8 +4,8 @@ Paramiko Expect
 .. image:: https://img.shields.io/pypi/l/paramiko-expect.svg
    :target: https://github.com/fgimian/paramiko-expect/blob/master/LICENSE
 
-.. image:: https://coveralls.io/repos/github/fgimian/paramiko-expect/badge.svg?branch=test-travis
-   :target: https://coveralls.io/github/fgimian/paramiko-expect?branch=test-travis
+.. image:: https://coveralls.io/repos/github/fgimian/paramiko-expect/badge.svg?branch=master
+   :target: https://coveralls.io/github/fgimian/paramiko-expect?branch=master
 
 .. image:: https://img.shields.io/travis/fgimian/paramiko-expect.svg   
    :target: https://travis-ci.org/fruch/paramiko-expect/
