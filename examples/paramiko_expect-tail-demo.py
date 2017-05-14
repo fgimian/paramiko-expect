@@ -11,7 +11,7 @@
 import traceback
 import paramiko
 from paramiko_expect import SSHClientInteraction
-
+from __future__ import print_function
 
 def main():
     # Set login credentials and the server prompt
@@ -43,7 +43,7 @@ def main():
         interact.tail(line_prefix=hostname+': ')
 
     except KeyboardInterrupt:
-        print 'Ctrl+C interruption detected, stopping tail'
+        print('Ctrl+C interruption detected, stopping tail')
     except Exception:
         traceback.print_exc()
     finally:
