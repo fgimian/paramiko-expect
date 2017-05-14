@@ -16,6 +16,7 @@ from __future__ import unicode_literals
 import sys
 import re
 import socket
+import struct
 
 # Windows does not have termios
 try:
@@ -193,7 +194,7 @@ class SSHClientInteraction(object):
         self.current_send_string = send_string
         self.channel.send(send_string + self.newline)
 
-    def tail(self, line_prefix=None, callback=None, output_callback=None):
+    def tail(self, line_prefix=None, callback=None, output_callback=None, stop_callback=lambda x: False, timeout=None):
         """
         This function takes control of an SSH channel and displays line
         by line of output as \n is recieved.  This function is specifically
@@ -213,6 +214,10 @@ class SSHClientInteraction(object):
         :param output_callback: A function used to print ssh output. Printed to stdout
                         by default. A user-defined logger may be passed like
                         output_callback=lambda m: mylog.debug(m)
+        :param stop_callback: A function usesd to stop the tail, when function retruns 
+                        True tail will stop, by default stop_callback=lambda x: False
+        :param timeout: how much time to wait for data, default to None which 
+                        mean almost forever.
         """
 
         output_callback = output_callback if output_callback else self.output_callback
@@ -220,11 +225,13 @@ class SSHClientInteraction(object):
         # Set the channel timeout to the maximum integer the server allows,
         # setting this to None breaks the KeyboardInterrupt exception and
         # won't allow us to Ctrl+C out of teh script
-        self.channel.settimeout(sys.maxsize)
+        timeout = timeout if timeout else  2 ** (struct.Struct(str('i')).size * 8 - 1) - 1
+        self.channel.settimeout(timeout)
 
         # Create an empty line buffer and a line counter
-        current_line = ''
+        current_line = b''
         line_counter = 0
+        line_feed_byte = '\n'.encode(self.encoding)
 
         # Loop forever, Ctrl+C (KeyboardInterrupt) is used to break the tail
         while True:
@@ -236,25 +243,26 @@ class SSHClientInteraction(object):
             if len(buffer) == 0:
                 break
 
-            # Strip all ugly \r (Ctrl-M making) characters from the current
-            # read
-            buffer = buffer.replace('\r', '')
-
             # Add the currently read buffer to the current line output
             current_line += buffer
 
             # Display the last read line in realtime when we reach a \n
             # character
-            if current_line.endswith('\n'):
+            if buffer == line_feed_byte:
+                current_line_decoded = current_line.decode(self.encoding)
                 if line_counter:
                     if callback:
-                        output_callback(callback(line_prefix, current_line))
+                        output_callback(callback(line_prefix, current_line_decoded))
                     else:
                         if line_prefix:
                             output_callback(line_prefix)
-                        output_callback(current_line)
+                        output_callback(current_line_decoded)
+
+                if stop_callback(current_line_decoded):
+                    break
+
                 line_counter += 1
-                current_line = ''
+                current_line = b''
 
     def take_control(self):
         """
@@ -288,8 +296,8 @@ class SSHClientInteraction(object):
                             buffer = self.channel.recv(self.buffer_size)
                             if len(buffer) == 0:
                                 break
-                            sys.stdout.write(buffer)
-                            sys.stdout.flush()
+                            sys.stdout.buffer.write(buffer)
+                            sys.stdout.buffer.flush()
                         except socket.timeout:
                             pass
                     # Send any keyboard input to the terminal one byte at a

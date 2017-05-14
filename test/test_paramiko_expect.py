@@ -1,5 +1,5 @@
-import signal
-import platform
+import io
+import sys
 
 import pytest
 import paramiko
@@ -55,22 +55,24 @@ def test_03_test_demo_helper(interact):
     interact.expect(prompt)
 
 
-@pytest.mark.skipif(not platform.python_implementation() == "CPython",
-                    reason="Pypy seems to  have problems with the signal")
 def test_04_tail(interact):
 
-    interact.send('curl -v https://httpbin.org/stream/100')
+    interact.send('sleep 1; curl -v https://httpbin.org/stream/100')
+    def stop_callback(msg):
+       return "Connection #0 to host httpbin.org left intact" in msg
+    interact.tail(stop_callback=stop_callback)
 
-    def signal_handler(signum, frame):
-        raise Exception("Timeout!")
-    
-    signal.signal(signal.SIGALRM, signal_handler)
-    
-    signal.alarm(2)   # Three seconds
 
-    try:
-        interact.tail()
-    except Exception as msg:
-        print(msg)
+def test_05_context():
 
-    signal.alarm(0)    # reset
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(hostname="localhost", username="root", port=2222, key_filename='./test/id_rsa')
+    with SSHClientInteraction(client, timeout=10, display=True) as interact:
+        interact.send('ls -all /')
+        interact.expect(prompt, timeout=120)
+
+def test_06_take_control(interact):
+    # TODO: think how to test this one
+    pass
+
