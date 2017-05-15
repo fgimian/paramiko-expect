@@ -23,7 +23,7 @@ try:
     import termios
     import tty
     has_termios = True
-except ImportError:
+except ImportError: # pragma: no cover
     import threading
     has_termios = False
 
@@ -316,7 +316,7 @@ class SSHClientInteraction(object):
                     buffer = sock.recv(self.buffer_size)
                     if len(buffer) == 0:
                         break
-                    sys.stdout.write(buffer)
+                    sys.stdout.write(buffer.decode(self.encoding))
                     sys.stdout.flush()
 
             writer = threading.Thread(target=writeall, args=(self.channel,))

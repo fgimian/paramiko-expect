@@ -5,11 +5,12 @@ import socket
 import pytest
 
 try:
-    from unittes import mock
+    from unittest import mock
 except ImportError:
     import mock
 
 import paramiko
+import paramiko_expect
 from paramiko_expect import SSHClientInteraction
 
 prompt=".*:~#.*"
@@ -146,6 +147,47 @@ def test_06_take_control_03(interact):
         stdin_mock.read.side_effect = [b"ls -all\n", b""]
         select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, interact.channel], [], []] ]
         interact.take_control()
+
+def test_06_take_control_no_termios_01(interact):
+
+    paramiko_expect.has_termios = False
+    import threading
+    paramiko_expect.threading = threading
+
+    with mock.patch.object(interact, 'channel') as channel_mock, \
+         mock.patch('sys.stdin') as stdin_mock:
+
+        channel_mock.recv.side_effect = [ b"test" ]
+        stdin_mock.read.side_effect = [b"ls -all\n", b""]
+        interact.take_control()
+
+
+def test_06_take_control_no_termios_02(interact):
+
+    paramiko_expect.has_termios = False
+    import threading
+    paramiko_expect.threading = threading
+
+    with mock.patch.object(interact, 'channel') as channel_mock, \
+         mock.patch('sys.stdin') as stdin_mock:
+
+        channel_mock.recv.side_effect = [ b"" ]
+        stdin_mock.read.side_effect = [b"ls -all\n", b""]
+        interact.take_control()
+
+def test_06_take_control_no_termios_03(interact):
+
+    paramiko_expect.has_termios = False
+    import threading
+    paramiko_expect.threading = threading
+
+    with mock.patch.object(interact, 'channel') as channel_mock, \
+         mock.patch('sys.stdin') as stdin_mock:
+
+        channel_mock.recv.side_effect = [ b"test", b"test"]
+        stdin_mock.read.side_effect = [b"ls -all\n", EOFError()]
+        interact.take_control()
+
 
 def test_07_close(interact):
 
