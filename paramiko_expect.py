@@ -29,6 +29,8 @@ except ImportError: # pragma: no cover
 
 import select
 
+def strip_ansi_codes(s):
+    return re.sub(r'\x1b\[([0-9,A-Z]{1,2}(;[0-9]{1,2})?(;[0-9]{3})?)?[m|K]?', '', s)
 
 def default_output_func(msg):
     sys.stdout.write(msg)
@@ -86,7 +88,7 @@ class SSHClientInteraction(object):
         except:
             pass
 
-    def expect(self, re_strings='', timeout=None, output_callback=None, default_match_prefix='.*\n'):
+    def expect(self, re_strings='', timeout=None, output_callback=None, default_match_prefix='.*\n', strip_ansi=True):
         """
         This function takes in a regular expression (or regular expressions)
         that represent the last line of output from the server.  The function
@@ -107,6 +109,8 @@ class SSHClientInteraction(object):
         :param default_match_prefix: A prefix to all match regexes, defaults to '.*\n',
                                      can set to '' on cases prompt is the first line,
                                      or the command has no output.
+        :param strip_ansi: If True, will strip ansi control chars befores regex matching
+                           default to True.
         :return: An EOF returns -1, a regex metch returns 0 and a match in a
                  list of regexes returns the index of the matched string in
                  the list.
@@ -154,6 +158,9 @@ class SSHClientInteraction(object):
             # (good for debugging purposes)
             if self.display:
                 output_callback(current_buffer_decoded)
+
+            if strip_ansi:
+                current_buffer_decoded = strip_ansi_codes(current_buffer_decoded)
 
             # Add the currently read buffer to the output
             self.current_output += current_buffer_decoded
