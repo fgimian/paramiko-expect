@@ -86,7 +86,7 @@ class SSHClientInteraction(object):
         except:
             pass
 
-    def expect(self, re_strings='', timeout=None, output_callback=None):
+    def expect(self, re_strings='', timeout=None, output_callback=None, default_match_prefix='.*\n'):
         """
         This function takes in a regular expression (or regular expressions)
         that represent the last line of output from the server.  The function
@@ -102,8 +102,11 @@ class SSHClientInteraction(object):
         :param timeout: Timeout in seconds.  If this timeout is exceeded,
                         then an exception is raised.
         :param output_callback: A function used to print ssh output. Printed to stdout
-                        by default. A user-defined logger may be passed like
-                        output_callback=lambda m: mylog.debug(m)
+                                by default. A user-defined logger may be passed like
+                                output_callback=lambda m: mylog.debug(m)
+        :param default_match_prefix: A prefix to all match regexes, defaults to '.*\n',
+                                     can set to '' on cases prompt is the first line,
+                                     or the command has no output.
         :return: An EOF returns -1, a regex metch returns 0 and a match in a
                  list of regexes returns the index of the matched string in
                  the list.
@@ -130,7 +133,7 @@ class SSHClientInteraction(object):
             len(re_strings) == 0 or
             not [re_string
                  for re_string in re_strings
-                 if re.match('.*\n' + re_string + '$',
+                 if re.match(default_match_prefix + re_string + '$',
                              self.current_output, re.DOTALL)]
         ):
             # Read some of the output
@@ -159,7 +162,7 @@ class SSHClientInteraction(object):
         if len(re_strings) != 0:
             found_pattern = [(re_index, re_string)
                              for re_index, re_string in enumerate(re_strings)
-                             if re.match('.*\n' + re_string + '$',
+                             if re.match(default_match_prefix + re_string + '$',
                                          self.current_output, re.DOTALL)]
 
         # Clean the output up by removing the sent command
