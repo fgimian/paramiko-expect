@@ -3,7 +3,6 @@ import sys
 import socket
 
 import pytest
-
 try:
     from unittest import mock
 except ImportError:
@@ -12,6 +11,11 @@ except ImportError:
 import paramiko
 import paramiko_expect
 from paramiko_expect import SSHClientInteraction
+
+try:
+    from contextlib import ExitStack, contextmanager
+except ImportError:
+    from contextlib2 import ExitStack, contextmanager
 
 prompt=".*:~#.*"
 
@@ -105,47 +109,52 @@ def test_05_context():
 
 def test_06_take_control_01(interact):
 
-    with mock.patch('termios.tcsetattr'), \
-        mock.patch('termios.tcgetattr'), \
-        mock.patch('tty.setraw'), \
-        mock.patch('tty.setcbreak'), \
-        mock.patch('select.select') as select_mock, \
-        mock.patch('sys.stdin') as stdin_mock:
+    with ExitStack() as stack:
+        mocks = [ mock.patch('termios.tcsetattr'), mock.patch('termios.tcgetattr'),
+            mock.patch('tty.setraw'), mock.patch('tty.setcbreak') ]
+        [ stack.enter_context(m) for m in mocks ]
 
+        select_mock = stack.enter_context(mock.patch('select.select'))
+        channel_mock = stack.enter_context(mock.patch.object(interact, 'channel'))
+        stdin_mock = stack.enter_context(mock.patch('sys.stdin'))
+
+        channel_mock.recv.side_effect = [ b"test", b"test" ]
         stdin_mock.read.side_effect = [b"ls -all\n", b""]
-        select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, interact.channel], [], []] ]
+        select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, channel_mock], [], []] ]
         interact.take_control()
 
 
 def test_06_take_control_02(interact):
 
-    with mock.patch('termios.tcsetattr'), \
-        mock.patch('termios.tcgetattr'), \
-        mock.patch('tty.setraw'), \
-        mock.patch('tty.setcbreak'), \
-        mock.patch('select.select') as select_mock, \
-        mock.patch.object(interact, 'channel') as channel_mock, \
-        mock.patch('sys.stdin') as stdin_mock:
+    with ExitStack() as stack:
+        mocks = [ mock.patch('termios.tcsetattr'), mock.patch('termios.tcgetattr'),
+            mock.patch('tty.setraw'), mock.patch('tty.setcbreak') ]
+        [ stack.enter_context(m) for m in mocks ]
+
+        select_mock = stack.enter_context(mock.patch('select.select'))
+        channel_mock = stack.enter_context(mock.patch.object(interact, 'channel'))
+        stdin_mock = stack.enter_context(mock.patch('sys.stdin'))
 
         channel_mock.recv.side_effect = [ socket.timeout() ] 
         stdin_mock.read.side_effect = [b"ls -all\n", b""]
-        select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, interact.channel], [], []] ]
+        select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, channel_mock], [], []] ]
         interact.take_control()
 
 
 def test_06_take_control_03(interact):
 
-    with mock.patch('termios.tcsetattr'), \
-        mock.patch('termios.tcgetattr'), \
-        mock.patch('tty.setraw'), \
-        mock.patch('tty.setcbreak'), \
-        mock.patch('select.select') as select_mock, \
-        mock.patch.object(interact, 'channel') as channel_mock, \
-        mock.patch('sys.stdin') as stdin_mock:
+    with ExitStack() as stack:
+        mocks = [ mock.patch('termios.tcsetattr'), mock.patch('termios.tcgetattr'), 
+            mock.patch('tty.setraw'), mock.patch('tty.setcbreak') ]
+        [ stack.enter_context(m) for m in mocks ]
+
+        select_mock = stack.enter_context(mock.patch('select.select'))
+        channel_mock = stack.enter_context(mock.patch.object(interact, 'channel'))
+        stdin_mock = stack.enter_context(mock.patch('sys.stdin'))
 
         channel_mock.recv.side_effect = [ "" ] 
         stdin_mock.read.side_effect = [b"ls -all\n", b""]
-        select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, interact.channel], [], []] ]
+        select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, channel_mock], [], []] ]
         interact.take_control()
 
 def test_06_take_control_no_termios_01(interact):
@@ -154,8 +163,9 @@ def test_06_take_control_no_termios_01(interact):
     import threading
     paramiko_expect.threading = threading
 
-    with mock.patch.object(interact, 'channel') as channel_mock, \
-         mock.patch('sys.stdin') as stdin_mock:
+    with ExitStack() as stack:
+        channel_mock = stack.enter_context(mock.patch.object(interact, 'channel'))
+        stdin_mock = stack.enter_context(mock.patch('sys.stdin'))
 
         channel_mock.recv.side_effect = [ b"test" ]
         stdin_mock.read.side_effect = [b"ls -all\n", b""]
@@ -168,8 +178,9 @@ def test_06_take_control_no_termios_02(interact):
     import threading
     paramiko_expect.threading = threading
 
-    with mock.patch.object(interact, 'channel') as channel_mock, \
-         mock.patch('sys.stdin') as stdin_mock:
+    with ExitStack() as stack:
+        channel_mock = stack.enter_context(mock.patch.object(interact, 'channel'))
+        stdin_mock = stack.enter_context(mock.patch('sys.stdin'))
 
         channel_mock.recv.side_effect = [ b"" ]
         stdin_mock.read.side_effect = [b"ls -all\n", b""]
@@ -181,10 +192,11 @@ def test_06_take_control_no_termios_03(interact):
     import threading
     paramiko_expect.threading = threading
 
-    with mock.patch.object(interact, 'channel') as channel_mock, \
-         mock.patch('sys.stdin') as stdin_mock:
+    with ExitStack() as stack:
+        channel_mock = stack.enter_context(mock.patch.object(interact, 'channel'))
+        stdin_mock = stack.enter_context(mock.patch('sys.stdin'))
 
-        channel_mock.recv.side_effect = [ b"test", b"test"]
+        channel_mock().recv.side_effect = [ b"test", b"test"]
         stdin_mock.read.side_effect = [b"ls -all\n", EOFError()]
         interact.take_control()
 
