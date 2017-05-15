@@ -180,7 +180,7 @@ class SSHClientInteraction(object):
 
         # Clean the output up by removing the expect output from the end if
         # requested and save the details of the matched pattern
-        if len(re_strings) != 0:
+        if len(re_strings) != 0 and len(found_pattern) != 0:
             self.current_output_clean = (
                 re.sub(
                     found_pattern[0][1] + '$', '', self.current_output_clean
