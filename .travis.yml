@@ -17,7 +17,7 @@ install:
 script: pytest -s --cov paramiko_expect --cov-report term-missing
 after_success: coveralls
 
-before_deploy: "chown `whoami`  `pwd`/test/id_rsa.pub"
+before_deploy: "sudo chown `whoami`  `pwd`/test/id_rsa.pub"
 deploy:
   provider: pypi
   user: fruch
