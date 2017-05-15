@@ -1,3 +1,5 @@
 pytest
 pytest-cov
 coveralls
+mock ; python_version <= '2.7'
+

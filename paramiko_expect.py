@@ -296,8 +296,8 @@ class SSHClientInteraction(object):
                             buffer = self.channel.recv(self.buffer_size)
                             if len(buffer) == 0:
                                 break
-                            sys.stdout.buffer.write(buffer)
-                            sys.stdout.buffer.flush()
+                            sys.stdout.write(buffer.decode(self.encoding))
+                            sys.stdout.flush()
                         except socket.timeout:
                             pass
                     # Send any keyboard input to the terminal one byte at a

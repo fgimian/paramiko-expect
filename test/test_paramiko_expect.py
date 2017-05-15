@@ -1,7 +1,14 @@
 import io
 import sys
+import socket
 
 import pytest
+
+try:
+    from unittes import mock
+except ImportError:
+    import mock
+
 import paramiko
 from paramiko_expect import SSHClientInteraction
 
@@ -62,6 +69,29 @@ def test_04_tail(interact):
        return "Connection #0 to host httpbin.org left intact" in msg
     interact.tail(stop_callback=stop_callback)
 
+def test_04_tail_line_prefix(interact):
+
+    interact.send('sleep 1; curl -v https://httpbin.org/stream/100')
+    def stop_callback(msg):
+       return "Connection #0 to host httpbin.org left intact" in msg
+    interact.tail(line_prefix="test:",  stop_callback=stop_callback)
+
+def test_04_tail_callback(interact):
+
+    interact.send('sleep 1; curl -v https://httpbin.org/stream/100')
+    def stop_callback(msg):
+       return "Connection #0 to host httpbin.org left intact" in msg
+    interact.tail(line_prefix="test:", callback=lambda p, m: "" ,stop_callback=stop_callback)
+
+def test_04_tail_empty_response(interact):
+
+    interact.send('sleep 1; curl -v https://httpbin.org/stream/100')
+    def stop_callback(msg):
+       return "Connection #0 to host httpbin.org left intact" in msg
+
+    with mock.patch.object(interact, 'channel') as channel_mock:
+        channel_mock.recv.side_effect = [ b"" ]        
+        interact.tail(line_prefix="test:", callback=lambda p, m: "" ,stop_callback=stop_callback)
 
 def test_05_context():
 
@@ -72,7 +102,54 @@ def test_05_context():
         interact.send('ls -all /')
         interact.expect(prompt, timeout=120)
 
-def test_06_take_control(interact):
-    # TODO: think how to test this one
-    pass
+def test_06_take_control_01(interact):
+
+    with mock.patch('termios.tcsetattr'), \
+        mock.patch('termios.tcgetattr'), \
+        mock.patch('tty.setraw'), \
+        mock.patch('tty.setcbreak'), \
+        mock.patch('select.select') as select_mock, \
+        mock.patch('sys.stdin') as stdin_mock:
+
+        stdin_mock.read.side_effect = [b"ls -all\n", b""]
+        select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, interact.channel], [], []] ]
+        interact.take_control()
+
+
+def test_06_take_control_02(interact):
+
+    with mock.patch('termios.tcsetattr'), \
+        mock.patch('termios.tcgetattr'), \
+        mock.patch('tty.setraw'), \
+        mock.patch('tty.setcbreak'), \
+        mock.patch('select.select') as select_mock, \
+        mock.patch.object(interact, 'channel') as channel_mock, \
+        mock.patch('sys.stdin') as stdin_mock:
+
+        channel_mock.recv.side_effect = [ socket.timeout() ] 
+        stdin_mock.read.side_effect = [b"ls -all\n", b""]
+        select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, interact.channel], [], []] ]
+        interact.take_control()
+
+
+def test_06_take_control_03(interact):
+
+    with mock.patch('termios.tcsetattr'), \
+        mock.patch('termios.tcgetattr'), \
+        mock.patch('tty.setraw'), \
+        mock.patch('tty.setcbreak'), \
+        mock.patch('select.select') as select_mock, \
+        mock.patch.object(interact, 'channel') as channel_mock, \
+        mock.patch('sys.stdin') as stdin_mock:
+
+        channel_mock.recv.side_effect = [ "" ] 
+        stdin_mock.read.side_effect = [b"ls -all\n", b""]
+        select_mock.side_effect = [ [[stdin_mock,], [], []], [[stdin_mock, interact.channel], [], []] ]
+        interact.take_control()
+
+def test_07_close(interact):
+
+    with mock.patch.object(interact, 'channel') as channel_mock:
+        channel_mock.close.side_effect = [ socket.timeout ]
+        interact.close()
 
