@@ -10,6 +10,8 @@ python:
 - '3.5'
 - '3.6'
 - pypy
+- nightly
+
 install:
 - pip install .
 - pip install -r requirements-test.txt
@@ -25,5 +27,7 @@ deploy:
     secure: FCls6gPaQuB3bdbKuTO92AffQLVD38o2NT2LFwri6Lf4FCosCGlxD/xLsNYvnmRFLp//YtMuQi8TseXtdTvT+Bo94kJmK0HsHAV2+cLX/F7HyKHu5peCrxlJEPzGxNX3CdYAGNxgMK63HfjoFKsMEQQxmNaRvV+TUcYjKBLql4A=
   on:
     tags: true
-    distributions: sdist bdist_wheel
+    distributions: 
+        - sdist 
+        - bdist_wheel
     repo: fgimian/paramiko-expect
