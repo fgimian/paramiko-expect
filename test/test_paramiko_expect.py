@@ -56,6 +56,9 @@ def test_02_test_other_commnads(interact):
     interact.send('ls -l /')
     interact.expect(prompt, timeout=5)
 
+    # Do not actually sleep, send a ctrl-c at the end
+    interact.send('sleep 3600' + chr(3), newline=False)
+
 def test_03_test_demo_helper(interact):
     interact.expect(prompt)
     interact.send('python /examples/paramiko_expect-demo-helper.py')
