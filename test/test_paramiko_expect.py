@@ -46,7 +46,7 @@ def test_01_install_python(interact):
     interact.send('apk add python')
     interact.expect(prompt, timeout=120)
 
-    interact.send('apk add curl')
+    interact.send('apk add curl curl-dev')
     interact.expect(prompt, timeout=120)
 
 
