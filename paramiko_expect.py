@@ -34,6 +34,10 @@ def strip_ansi_codes(s):
     return re.sub(r'\x1b\[([0-9,A-Z]{1,2}(;[0-9]{1,2})?(;[0-9]{3})?)?[m|K]?', '', s)
 
 
+def chunker(seq, size):
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+
+
 def default_output_func(msg):
     sys.stdout.write(msg)
     sys.stdout.flush()
@@ -68,11 +72,13 @@ class SSHClientInteraction(object):
         self.display = display
         self.encoding = encoding
         self.output_callback = output_callback
+        self.tty_width = tty_width
 
         self.current_output = ''
         self.current_output_clean = ''
         self.current_send_string = ''
         self.last_match = ''
+        self.last_match_content = ''
 
     def __del__(self):
         self.close()
@@ -180,11 +186,17 @@ class SSHClientInteraction(object):
         # Clean the output up by removing the sent command
         self.current_output_clean = self.current_output
         if len(self.current_send_string) != 0:
-            self.current_output_clean = (
-                self.current_output_clean.replace(
-                    self.current_send_string + '\n', ''
+            chunks = [i for i in chunker(self.last_match_content + self.current_send_string, self.tty_width)]
+            chunks[0] = (
+                chunks[0].replace(
+                    self.last_match_content, '', 1
                 )
             )
+
+            for chunk in chunks:
+                self.current_output_clean = (
+                    self.current_output_clean.replace(chunk + '\n', '', 1)
+                )
 
         # Reset the current send string to ensure that multiple expect calls
         # don't result in bad output cleaning
@@ -193,11 +205,17 @@ class SSHClientInteraction(object):
         # Clean the output up by removing the expect output from the end if
         # requested and save the details of the matched pattern
         if len(re_strings) != 0 and len(found_pattern) != 0:
+            res = re.search(
+                found_pattern[0][1], self.current_output_clean
+            )
+
+            self.last_match_content = res.group() if res else ''
             self.current_output_clean = (
                 re.sub(
                     found_pattern[0][1] + '$', '', self.current_output_clean
                 )
             )
+
             self.last_match = found_pattern[0][1]
             return found_pattern[0][0]
         else:
