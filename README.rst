@@ -175,7 +175,7 @@ Not full coverage yet, and assumes you have docker setup:
 .. code:: bash
 
     pip install -r requirements-test.txt
-    docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  macropin/sshd
+    docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  docker.io/panubo/sshd
     pytest -s --cov paramiko_expect --cov-report term-missing
 
 
