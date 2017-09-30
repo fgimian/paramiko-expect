@@ -56,9 +56,6 @@ def test_02_test_other_commnads(interact):
     interact.send('ls -l /')
     interact.expect(prompt, timeout=5)
 
-    # Do not actually sleep, send a ctrl-c at the end
-    interact.send('sleep 3600' + chr(3), newline=False)
-
 def test_03_test_demo_helper(interact):
     interact.expect(prompt)
     interact.send('python /examples/paramiko_expect-demo-helper.py')
@@ -210,3 +207,19 @@ def test_07_close(interact):
         channel_mock.close.side_effect = [ socket.timeout ]
         interact.close()
 
+def test_08_issue_25_skip_newline():
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(hostname="localhost", username="root", port=2222, key_filename='./test/id_rsa')
+    with SSHClientInteraction(client, timeout=10, display=True) as interact:
+        interact.send('ls -all')
+        interact.expect(prompt, timeout=5)
+
+        # Do not actually sleep, send a ctrl-c at the end
+        interact.send('sleep 1', newline=chr(3))
+        interact.expect(prompt, timeout=5)
+        interact.send('sleep 1' + chr(3), newline='')
+        interact.expect(prompt, timeout=5)
+
+        interact.send('ls -all')
+        interact.expect(prompt, timeout=5)

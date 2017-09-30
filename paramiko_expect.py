@@ -200,13 +200,12 @@ class SSHClientInteraction(object):
             # measure, let's send back a -1
             return -1
 
-    def send(self, send_string, newline=True):
+    def send(self, send_string, newline=None):
         """Saves and sends the send string provided."""
         self.current_send_string = send_string
-        if newline:
-            self.channel.send(send_string + self.newline)
-        else:
-            self.channel.send(send_string)
+        newline = newline if newline is not None else self.newline
+        
+        self.channel.send(send_string + newline)
 
     def tail(self, line_prefix=None, callback=None, output_callback=None, stop_callback=lambda x: False, timeout=None):
         """
