@@ -15,8 +15,12 @@ python:
 install:
 - pip install .
 - pip install -r requirements-test.txt
-- docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  macropin/sshd
-script: pytest -s --cov paramiko_expect --cov-report term-missing
+
+script: 
+- docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  docker.io/panubo/sshd
+- sleep 2
+- py.test -s --cov paramiko_expect --cov-report term-missing
+
 after_success: coveralls
 
 before_deploy: "sudo chown `whoami`  `pwd`/test/id_rsa.pub"
