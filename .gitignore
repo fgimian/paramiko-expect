@@ -6,3 +6,10 @@ dist
 .pydevproject
 .vagrant
 .settings
+.coverage
+.cache/*
+
+.env
+.venv*/*
+
+prepare_test_env
