@@ -7,6 +7,7 @@
 #
 # This interactive script is used to help demonstrate the paramiko_expect-demo.py
 # script
+from __future__ import print_function
 import sys
 
 
