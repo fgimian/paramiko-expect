@@ -20,7 +20,8 @@ script:
   - sleep 2
   - py.test -s --cov paramiko_expect --cov-report term-missing
 
-after_success: coveralls
+after_success:
+  - codecov
 
 before_deploy: "sudo chown `whoami` `pwd`/test/id_rsa.pub"
 deploy:

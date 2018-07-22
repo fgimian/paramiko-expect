@@ -4,16 +4,16 @@ Paramiko Expect
 .. image:: https://img.shields.io/pypi/l/paramiko-expect.svg
    :target: https://github.com/fgimian/paramiko-expect/blob/master/LICENSE
 
-.. image:: https://coveralls.io/repos/github/fgimian/paramiko-expect/badge.svg?branch=master
-   :target: https://coveralls.io/github/fgimian/paramiko-expect?branch=master
+.. image:: https://codecov.io/gh/fgimian/paramiko-expect/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/fgimian/paramiko-expect
 
-.. image:: https://img.shields.io/travis/fgimian/paramiko-expect.svg   
+.. image:: https://img.shields.io/travis/fgimian/paramiko-expect.svg
    :target: https://travis-ci.org/fruch/paramiko-expect/
 
-.. image:: https://img.shields.io/pypi/v/paramiko-expect.svg   
+.. image:: https://img.shields.io/pypi/v/paramiko-expect.svg
    :target: https://pypi.python.org/pypi/paramiko-expect/
 
-.. image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg   
+.. image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg
    :target:  https://pypi.python.org/pypi/paramiko-expect/
 
 

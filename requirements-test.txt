@@ -1,5 +1,5 @@
 pytest
 pytest-cov
-coveralls
+codecov
 mock ; python_version <= '2.7'
 contextlib2 ; python_version <= '3.2'
