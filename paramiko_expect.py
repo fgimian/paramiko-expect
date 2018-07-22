@@ -23,14 +23,16 @@ try:
     import termios
     import tty
     has_termios = True
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     import threading
     has_termios = False
 
 import select
 
+
 def strip_ansi_codes(s):
     return re.sub(r'\x1b\[([0-9,A-Z]{1,2}(;[0-9]{1,2})?(;[0-9]{3})?)?[m|K]?', '', s)
+
 
 def default_output_func(msg):
     sys.stdout.write(msg)
@@ -85,10 +87,13 @@ class SSHClientInteraction(object):
         """Attempts to close the channel for clean completion."""
         try:
             self.channel.close()
-        except:
+        except Exception:
             pass
 
-    def expect(self, re_strings='', timeout=None, output_callback=None, default_match_prefix='.*\n', strip_ansi=True):
+    def expect(
+        self, re_strings='', timeout=None, output_callback=None, default_match_prefix='.*\n',
+        strip_ansi=True
+    ):
         """
         This function takes in a regular expression (or regular expressions)
         that represent the last line of output from the server.  The function
@@ -204,10 +209,13 @@ class SSHClientInteraction(object):
         """Saves and sends the send string provided."""
         self.current_send_string = send_string
         newline = newline if newline is not None else self.newline
-        
+
         self.channel.send(send_string + newline)
 
-    def tail(self, line_prefix=None, callback=None, output_callback=None, stop_callback=lambda x: False, timeout=None):
+    def tail(
+        self, line_prefix=None, callback=None, output_callback=None, stop_callback=lambda x: False,
+        timeout=None
+    ):
         """
         This function takes control of an SSH channel and displays line
         by line of output as \n is recieved.  This function is specifically
@@ -227,9 +235,9 @@ class SSHClientInteraction(object):
         :param output_callback: A function used to print ssh output. Printed to stdout
                         by default. A user-defined logger may be passed like
                         output_callback=lambda m: mylog.debug(m)
-        :param stop_callback: A function usesd to stop the tail, when function retruns 
+        :param stop_callback: A function usesd to stop the tail, when function retruns
                         True tail will stop, by default stop_callback=lambda x: False
-        :param timeout: how much time to wait for data, default to None which 
+        :param timeout: how much time to wait for data, default to None which
                         mean almost forever.
         """
 
@@ -238,7 +246,7 @@ class SSHClientInteraction(object):
         # Set the channel timeout to the maximum integer the server allows,
         # setting this to None breaks the KeyboardInterrupt exception and
         # won't allow us to Ctrl+C out of teh script
-        timeout = timeout if timeout else  2 ** (struct.Struct(str('i')).size * 8 - 1) - 1
+        timeout = timeout if timeout else 2 ** (struct.Struct(str('i')).size * 8 - 1) - 1
         self.channel.settimeout(timeout)
 
         # Create an empty line buffer and a line counter

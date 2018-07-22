@@ -8,7 +8,9 @@
 # This script demonstrates the SSHClientInteraction class in the paramiko
 # expect library
 #
+from __future__ import print_function
 import traceback
+
 import paramiko
 from paramiko_expect import SSHClientInteraction
 
@@ -72,21 +74,22 @@ def main():
             interact.expect()
 
         # Print the output of each command
-        print '-'*79
-        print 'Cleaned Command Output'
-        print '-'*79
-        print 'uname -a output:'
-        print cmd_output_uname
-        print 'ls -l / output:'
-        print cmd_output_ls
+        print('-' * 79)
+        print('Cleaned Command Output')
+        print('-' * 79)
+        print('uname -a output:')
+        print(cmd_output_uname)
+        print('ls -l / output:')
+        print(cmd_output_ls)
 
     except Exception:
         traceback.print_exc()
     finally:
         try:
             client.close()
-        except:
+        except Exception:
             pass
+
 
 if __name__ == '__main__':
     main()

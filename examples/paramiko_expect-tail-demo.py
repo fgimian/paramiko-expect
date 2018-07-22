@@ -8,17 +8,19 @@
 # This script demonstrates the tail functionality in the SSHClientInteraction
 # class in the paramiko expect library
 #
+from __future__ import print_function
 import traceback
+
 import paramiko
 from paramiko_expect import SSHClientInteraction
-from __future__ import print_function
+
 
 def main():
     # Set login credentials and the server prompt
     hostname = 'localhost'
     username = 'vagrant'
     password = 'vagrant'
-    prompt = 'vagrant@paramiko-expect-dev:~\$\s+'
+    prompt = r'vagrant@paramiko-expect-dev:~\$\s+'
 
     # Use SSH client to login
     try:
@@ -49,8 +51,9 @@ def main():
     finally:
         try:
             client.close()
-        except:
+        except Exception:
             pass
+
 
 if __name__ == '__main__':
     main()
