@@ -23,6 +23,9 @@ script:
 after_success:
   - codecov
 
+notifications:
+  email: false
+
 before_deploy: "sudo chown `whoami` `pwd`/test/id_rsa.pub"
 deploy:
   provider: pypi
