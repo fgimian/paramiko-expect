@@ -92,7 +92,7 @@ class SSHClientInteraction(object):
 
     def expect(
         self, re_strings='', timeout=None, output_callback=None, default_match_prefix='.*\n',
-        strip_ansi=True
+        strip_ansi=True, bash_prompt='$'
     ):
         """
         This function takes in a regular expression (or regular expressions)
@@ -142,7 +142,7 @@ class SSHClientInteraction(object):
             len(re_strings) == 0 or
             not [re_string
                  for re_string in re_strings
-                 if re.match(default_match_prefix + re_string + '$',
+                 if re.match(default_match_prefix + re_string + bash_prompt,
                              self.current_output, re.DOTALL)]
         ):
             # Read some of the output
