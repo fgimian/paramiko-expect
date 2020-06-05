@@ -13,6 +13,7 @@
 #
 from __future__ import unicode_literals
 
+import codecs
 import sys
 import re
 import socket
@@ -75,6 +76,10 @@ class SSHClientInteraction(object):
         self.current_send_string = ''
         self.last_match = ''
 
+        # If the output is long, multi-byte encoded characters may be split
+        # across calls to recv, so decode incrementally.
+        self.decoder = codecs.getincrementaldecoder(self.encoding)()
+
     def __del__(self):
         self.close()
 
@@ -130,6 +135,8 @@ class SSHClientInteraction(object):
         timeout = timeout if timeout else self.timeout
         self.channel.settimeout(timeout)
 
+        if ignore_decode_error:
+            self.decoder = codecs.getincrementaldecoder(self.encoding)('ignore')
         # Create an empty output buffer
         self.current_output = ''
         # saves the current buffer to check for re_strings pattern
@@ -165,8 +172,7 @@ class SSHClientInteraction(object):
                 break
 
             # Convert the buffer to our chosen encoding
-            current_buffer_decoded = current_buffer.decode(self.encoding, errors='ignore') if ignore_decode_error \
-                else current_buffer.decode(self.encoding)
+            current_buffer_decoded = self.decoder.decode(current_buffer)
 
             # Strip all ugly \r (Ctrl-M making) characters from the current
             # read
@@ -286,7 +292,7 @@ class SSHClientInteraction(object):
             # Display the last read line in realtime when we reach a \n
             # character
             if buffer == line_feed_byte:
-                current_line_decoded = current_line.decode(self.encoding)
+                current_line_decoded = self.decoder.decode(current_line)
                 if line_counter:
                     if callback:
                         output_callback(callback(line_prefix, current_line_decoded))
@@ -333,7 +339,7 @@ class SSHClientInteraction(object):
                             buffer = self.channel.recv(self.buffer_size)
                             if len(buffer) == 0:
                                 break
-                            sys.stdout.write(buffer.decode(self.encoding))
+                            sys.stdout.write(self.decoder.decode(buffer))
                             sys.stdout.flush()
                         except socket.timeout:
                             pass
@@ -353,7 +359,7 @@ class SSHClientInteraction(object):
                     buffer = sock.recv(self.buffer_size)
                     if len(buffer) == 0:
                         break
-                    sys.stdout.write(buffer.decode(self.encoding))
+                    sys.stdout.write(self.decoder.decode(buffer))
                     sys.stdout.flush()
 
             writer = threading.Thread(target=writeall, args=(self.channel,))
