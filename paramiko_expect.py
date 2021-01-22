@@ -129,7 +129,8 @@ class SSHClientInteraction(object):
 
         # Create an empty output buffer
         self.current_output = ''
-
+        # saves the current buffer to check for re_strings pattern
+        current_buffer_output_decoded = ''
         # This function needs all regular expressions to be in the form of a
         # list, so if the user provided a string, let's convert it to a 1
         # item list.
@@ -143,8 +144,12 @@ class SSHClientInteraction(object):
             not [re_string
                  for re_string in re_strings
                  if re.match(default_match_prefix + re_string + '$',
-                             self.current_output, re.DOTALL)]
+                             current_buffer_output_decoded, re.DOTALL)]
         ):
+            current_buffer_output_decoded = ''
+            # avoids paramiko hang when recv is not ready yet
+            while not self.channel.recv_ready():
+                 time.sleep(.009)
             # Read some of the output
             current_buffer = self.channel.recv(self.buffer_size)
 
@@ -169,6 +174,7 @@ class SSHClientInteraction(object):
 
             # Add the currently read buffer to the output
             self.current_output += current_buffer_decoded
+            current_buffer_output_decoded = '\n' + self.current_output.splitlines()[-1]
 
         # Grab the first pattern that was matched
         if len(re_strings) != 0:
@@ -209,7 +215,9 @@ class SSHClientInteraction(object):
         """Saves and sends the send string provided."""
         self.current_send_string = send_string
         newline = newline if newline is not None else self.newline
-
+        # don't send till send_ready
+        while not self.channel.send_ready():
+            time.sleep(.009)
         self.channel.send(send_string + newline)
 
     def tail(
