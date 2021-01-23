@@ -17,6 +17,7 @@ import sys
 import re
 import socket
 import struct
+import time
 
 # Windows does not have termios
 try:
@@ -136,7 +137,8 @@ class SSHClientInteraction(object):
         # item list.
         if isinstance(re_strings, str) and len(re_strings) != 0:
             re_strings = [re_strings]
-
+        # to avoid looping in recv_ready()
+        base_time = time.time()
         # Loop until one of the expressions is matched or loop forever if
         # nothing is expected (usually used for exit)
         while (
@@ -149,7 +151,10 @@ class SSHClientInteraction(object):
             current_buffer_output_decoded = ''
             # avoids paramiko hang when recv is not ready yet
             while not self.channel.recv_ready():
-                 time.sleep(.009)
+                time.sleep(.009)
+                if time.time() >= (base_time + timeout):
+                    print('EXCESS TIME RECV_READY TIMEOUT, did you expect() before a send()')
+                    return -1
             # Read some of the output
             current_buffer = self.channel.recv(self.buffer_size)
 
