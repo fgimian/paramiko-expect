@@ -92,7 +92,7 @@ class SSHClientInteraction(object):
 
     def expect(
         self, re_strings='', timeout=None, output_callback=None, default_match_prefix='.*\n',
-        strip_ansi=True
+        strip_ansi=True, ignore_decode_error=True
     ):
         """
         This function takes in a regular expression (or regular expressions)
@@ -115,6 +115,8 @@ class SSHClientInteraction(object):
                                      can set to '' on cases prompt is the first line,
                                      or the command has no output.
         :param strip_ansi: If True, will strip ansi control chars befores regex matching
+                           default to True.
+        :param ignore_decode_error: If True, will ignore decode errors if any.
                            default to True.
         :return: An EOF returns -1, a regex metch returns 0 and a match in a
                  list of regexes returns the index of the matched string in
@@ -153,7 +155,8 @@ class SSHClientInteraction(object):
                 break
 
             # Convert the buffer to our chosen encoding
-            current_buffer_decoded = current_buffer.decode(self.encoding)
+            current_buffer_decoded = current_buffer.decode(self.encoding, errors='ignore') if ignore_decode_error \
+                else current_buffer.decode(self.encoding)
 
             # Strip all ugly \r (Ctrl-M making) characters from the current
             # read
