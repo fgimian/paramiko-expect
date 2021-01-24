@@ -43,7 +43,7 @@ def test_01_install_python(interact):
     interact.send('apk update')
     interact.expect(prompt, timeout=120)
 
-    interact.send('apk add python')
+    interact.send('apk add python3')
     interact.expect(prompt, timeout=120)
 
     interact.send('apk add curl')
@@ -57,7 +57,7 @@ def test_02_test_other_commnads(interact):
 
 def test_03_test_demo_helper(interact):
     interact.expect(prompt)
-    interact.send('python /examples/paramiko_expect-demo-helper.py')
+    interact.send('python3 /examples/paramiko_expect-demo-helper.py')
     found_index = interact.expect([prompt, '.*Please enter your name:.*'])
     assert interact.last_match == '.*Please enter your name:.*'
     assert found_index == 1

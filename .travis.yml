@@ -16,7 +16,7 @@ install:
   - pip install -r requirements-test.txt
 
 script:
-  - docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys  docker.io/panubo/sshd
+  - docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys -e SSH_ENABLE_ROOT=true docker.io/panubo/sshd
   - sleep 2
   - py.test -s --cov paramiko_expect --cov-report term-missing
 
