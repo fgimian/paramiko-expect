@@ -1,0 +1,67 @@
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      max-parallel: 8
+      matrix:
+        # https://help.github.com/articles/virtual-environments-for-github-actions
+        platform:
+          - ubuntu-latest  # ubuntu-18.04
+          # - macos-latest  # macOS-10.14 currently broken
+          # - windows-latest  # windows-2019 need some work and love
+        python-version: [2.7, 3.6, 3.7, 3.8, 3.9, pypy-3.6, pypy-3.7 ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools
+        pip install .
+        pip install -r requirements-test.txt
+    - name: Test with pytest
+      run: |
+        sudo chown `whoami` `pwd`/test/id_rsa.pub
+        docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys -e SSH_ENABLE_ROOT=true docker.io/panubo/sshd
+        sleep 2
+        py.test -s --cov paramiko_expect --cov-report term-missing
+    - name: Upload coverage.xml to codecov
+      if: ${{ matrix.python-version == '3.8' }}
+      uses: codecov/codecov-action@v1
+
+  publish:
+    needs: [test]
+    runs-on: ubuntu-latest
+    # upload to PyPI on every tag starting with 'v'
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+    # alternatively, to publish when a GitHub Release is created, use the following rule:
+    # if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: '3.8'
+
+      - name: Build sdist
+        run: python setup.py sdist
+
+      - name: Build bdist_wheel
+        run: |
+          pip install wheel
+          python setup.py bdist_wheel
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
