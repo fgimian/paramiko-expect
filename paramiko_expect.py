@@ -157,7 +157,6 @@ class SSHClientInteraction(object):
                  if re.match(default_match_prefix + re_string + '$',
                              current_buffer_output_decoded, re.DOTALL)]
         ):
-            current_buffer_output_decoded = ''
             # avoids paramiko hang when recv is not ready yet
             while not self.channel.recv_ready():
                 time.sleep(.009)
@@ -188,7 +187,7 @@ class SSHClientInteraction(object):
 
             # Add the currently read buffer to the output
             self.current_output += current_buffer_decoded
-            current_buffer_output_decoded = '\n' + self.current_output.splitlines()[-1]
+            current_buffer_output_decoded = '\n' + current_buffer_decoded
 
         # Grab the first pattern that was matched
         if len(re_strings) != 0:
