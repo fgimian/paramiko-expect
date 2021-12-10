@@ -25,9 +25,11 @@ try:
     import termios
     import tty
     has_termios = True
+    MAX_TIMEOUT = 2 ** (struct.Struct(str('i')).size * 8 - 1) - 1
 except ImportError:  # pragma: no cover
     import threading
     has_termios = False
+    MAX_TIMEOUT = threading.TIMEOUT_MAX
 
 import select
 
@@ -272,10 +274,10 @@ class SSHClientInteraction(object):
 
         output_callback = output_callback if output_callback else self.output_callback
 
-        # Set the channel timeout to the maximum value the threading package allows,
+        # Set the channel timeout to the maximum allowed value,
         # setting this to None breaks the KeyboardInterrupt exception and
-        # won't allow us to Ctrl+C out of teh script
-        timeout = timeout if timeout else threading.TIMEOUT_MAX
+        # won't allow us to Ctrl+C out of the script
+        timeout = timeout if timeout else MAX_TIMEOUT
         self.channel.settimeout(timeout)
 
         # Create an empty line buffer and a line counter
