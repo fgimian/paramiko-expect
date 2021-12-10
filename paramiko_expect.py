@@ -265,10 +265,10 @@ class SSHClientInteraction(object):
 
         output_callback = output_callback if output_callback else self.output_callback
 
-        # Set the channel timeout to the maximum integer the server allows,
+        # Set the channel timeout to the maximum value the threading package allows,
         # setting this to None breaks the KeyboardInterrupt exception and
         # won't allow us to Ctrl+C out of teh script
-        timeout = timeout if timeout else 2 ** (struct.Struct(str('i')).size * 8 - 1) - 1
+        timeout = timeout if timeout else threading.TIMEOUT_MAX
         self.channel.settimeout(timeout)
 
         # Create an empty line buffer and a line counter
