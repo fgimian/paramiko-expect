@@ -15,6 +15,7 @@ setup(
     author_email='fgimiansoftware@gmail.com',
     description='An expect-like extension for the Paramiko SSH library',
     long_description=long_description,
+    long_description_content_type='text/x-rst'
     platforms='Posix',
     py_modules=['paramiko_expect'],
     install_requires=[
