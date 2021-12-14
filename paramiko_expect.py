@@ -182,11 +182,14 @@ class SSHClientInteraction(object):
 
             # Display the current buffer in realtime if requested to do so
             # (good for debugging purposes)
-            if self.display:
-                output_callback(current_buffer_decoded)
-
             if strip_ansi:
                 current_buffer_decoded = strip_ansi_codes(current_buffer_decoded)
+
+            if not current_buffer_decoded:
+                continue
+
+            if self.display:
+                output_callback(current_buffer_decoded)
 
             # Add the currently read buffer to the output
             self.current_output += current_buffer_decoded
@@ -204,7 +207,7 @@ class SSHClientInteraction(object):
         if len(self.current_send_string) != 0:
             self.current_output_clean = (
                 self.current_output_clean.replace(
-                    self.current_send_string + '\n', ''
+                    self.current_send_string + self.newline, ''
                 )
             )
 
@@ -230,11 +233,13 @@ class SSHClientInteraction(object):
     def send(self, send_string, newline=None):
         """Saves and sends the send string provided."""
         self.current_send_string = send_string
+        # send_string, _ = codecs.getdecoder(self.encoding)(send_string)
         newline = newline if newline is not None else self.newline
         # don't send till send_ready
         while not self.channel.send_ready():
             time.sleep(.009)
-        self.channel.send(send_string + newline)
+        self.channel.send(send_string)
+        self.channel.send(newline)
 
     def tail(
         self, line_prefix=None, callback=None, output_callback=None, stop_callback=lambda x: False,
