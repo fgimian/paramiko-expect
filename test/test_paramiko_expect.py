@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import socket
 
 import pytest
@@ -238,3 +240,6 @@ def test_08_issue_25_skip_newline():
 
         interact.send('ls -all')
         interact.expect(prompt, timeout=5)
+
+def test_09_utf8(interact):
+    interact.send(u'André')

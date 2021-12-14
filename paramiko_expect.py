@@ -25,9 +25,11 @@ try:
     import termios
     import tty
     has_termios = True
+    MAX_TIMEOUT = 2 ** (struct.Struct(str('i')).size * 8 - 1) - 1
 except ImportError:  # pragma: no cover
     import threading
     has_termios = False
+    MAX_TIMEOUT = threading.TIMEOUT_MAX
 
 import select
 
@@ -56,12 +58,14 @@ class SSHClientInteraction(object):
                     real-time as it is being performed (especially useful
                     when debugging)
     :param encoding: The character encoding to use.
+    :param lines_to_check: The number of last few lines of the output to
+                           look at, while matching regular expression(s)
     """
 
     def __init__(
         self, client, timeout=60, newline='\r', buffer_size=1024,
         display=False, encoding='utf-8', output_callback=default_output_func,
-        tty_width=80, tty_height=24
+        tty_width=80, tty_height=24, lines_to_check=1
     ):
         self.channel = client.invoke_shell(width=tty_width, height=tty_height)
         self.timeout = timeout
@@ -70,6 +74,7 @@ class SSHClientInteraction(object):
         self.display = display
         self.encoding = encoding
         self.output_callback = output_callback
+        self.lines_to_check = lines_to_check
 
         self.current_output = ''
         self.current_output_clean = ''
@@ -98,7 +103,7 @@ class SSHClientInteraction(object):
 
     def expect(
         self, re_strings='', timeout=None, output_callback=None, default_match_prefix='.*\n',
-        strip_ansi=True, ignore_decode_error=True
+        strip_ansi=True, ignore_decode_error=True, lines_to_check=None
     ):
         """
         This function takes in a regular expression (or regular expressions)
@@ -124,6 +129,8 @@ class SSHClientInteraction(object):
                            default to True.
         :param ignore_decode_error: If True, will ignore decode errors if any.
                            default to True.
+        :param lines_to_check: The number of last few lines of the output to
+                               look at, while matching regular expression(s)
         :return: An EOF returns -1, a regex metch returns 0 and a match in a
                  list of regexes returns the index of the matched string in
                  the list.
@@ -134,6 +141,8 @@ class SSHClientInteraction(object):
         # Set the channel timeout
         timeout = timeout if timeout else self.timeout
         self.channel.settimeout(timeout)
+
+        lines_to_check = lines_to_check if lines_to_check else self.lines_to_check
 
         if ignore_decode_error:
             self.decoder = codecs.getincrementaldecoder(self.encoding)('ignore')
@@ -179,15 +188,18 @@ class SSHClientInteraction(object):
 
             # Display the current buffer in realtime if requested to do so
             # (good for debugging purposes)
-            if self.display:
-                output_callback(current_buffer_decoded)
-
             if strip_ansi:
                 current_buffer_decoded = strip_ansi_codes(current_buffer_decoded)
 
+            if not current_buffer_decoded:
+                continue
+
+            if self.display:
+                output_callback(current_buffer_decoded)
+
             # Add the currently read buffer to the output
             self.current_output += current_buffer_decoded
-            current_buffer_output_decoded = '\n' + current_buffer_decoded
+            current_buffer_output_decoded = '\n' + '\n'.join(self.current_output.splitlines()[-lines_to_check:])
 
         # Grab the first pattern that was matched
         if len(re_strings) != 0:
@@ -201,7 +213,7 @@ class SSHClientInteraction(object):
         if len(self.current_send_string) != 0:
             self.current_output_clean = (
                 self.current_output_clean.replace(
-                    self.current_send_string + '\n', ''
+                    self.current_send_string + self.newline, ''
                 )
             )
 
@@ -227,11 +239,13 @@ class SSHClientInteraction(object):
     def send(self, send_string, newline=None):
         """Saves and sends the send string provided."""
         self.current_send_string = send_string
+        # send_string, _ = codecs.getdecoder(self.encoding)(send_string)
         newline = newline if newline is not None else self.newline
         # don't send till send_ready
         while not self.channel.send_ready():
             time.sleep(.009)
-        self.channel.send(send_string + newline)
+        self.channel.send(send_string)
+        self.channel.send(newline)
 
     def tail(
         self, line_prefix=None, callback=None, output_callback=None, stop_callback=lambda x: False,
@@ -264,10 +278,10 @@ class SSHClientInteraction(object):
 
         output_callback = output_callback if output_callback else self.output_callback
 
-        # Set the channel timeout to the maximum integer the server allows,
+        # Set the channel timeout to the maximum allowed value,
         # setting this to None breaks the KeyboardInterrupt exception and
-        # won't allow us to Ctrl+C out of teh script
-        timeout = timeout if timeout else 2 ** (struct.Struct(str('i')).size * 8 - 1) - 1
+        # won't allow us to Ctrl+C out of the script
+        timeout = timeout if timeout else MAX_TIMEOUT
         self.channel.settimeout(timeout)
 
         # Create an empty line buffer and a line counter
