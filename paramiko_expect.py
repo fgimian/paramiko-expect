@@ -58,12 +58,14 @@ class SSHClientInteraction(object):
                     real-time as it is being performed (especially useful
                     when debugging)
     :param encoding: The character encoding to use.
+    :param lines_to_check: The number of last few lines of the output to
+                           look at, while matching regular expression(s)
     """
 
     def __init__(
         self, client, timeout=60, newline='\r', buffer_size=1024,
         display=False, encoding='utf-8', output_callback=default_output_func,
-        tty_width=80, tty_height=24
+        tty_width=80, tty_height=24, lines_to_check=1
     ):
         self.channel = client.invoke_shell(width=tty_width, height=tty_height)
         self.timeout = timeout
@@ -72,6 +74,7 @@ class SSHClientInteraction(object):
         self.display = display
         self.encoding = encoding
         self.output_callback = output_callback
+        self.lines_to_check = lines_to_check
 
         self.current_output = ''
         self.current_output_clean = ''
@@ -100,7 +103,7 @@ class SSHClientInteraction(object):
 
     def expect(
         self, re_strings='', timeout=None, output_callback=None, default_match_prefix='.*\n',
-        strip_ansi=True, ignore_decode_error=True
+        strip_ansi=True, ignore_decode_error=True, lines_to_check=None
     ):
         """
         This function takes in a regular expression (or regular expressions)
@@ -126,6 +129,8 @@ class SSHClientInteraction(object):
                            default to True.
         :param ignore_decode_error: If True, will ignore decode errors if any.
                            default to True.
+        :param lines_to_check: The number of last few lines of the output to
+                               look at, while matching regular expression(s)
         :return: An EOF returns -1, a regex metch returns 0 and a match in a
                  list of regexes returns the index of the matched string in
                  the list.
@@ -136,6 +141,8 @@ class SSHClientInteraction(object):
         # Set the channel timeout
         timeout = timeout if timeout else self.timeout
         self.channel.settimeout(timeout)
+
+        lines_to_check = lines_to_check if lines_to_check else self.lines_to_check
 
         if ignore_decode_error:
             self.decoder = codecs.getincrementaldecoder(self.encoding)('ignore')
@@ -190,7 +197,7 @@ class SSHClientInteraction(object):
 
             # Add the currently read buffer to the output
             self.current_output += current_buffer_decoded
-            current_buffer_output_decoded = '\n' + self.current_output.splitlines()[-1]
+            current_buffer_output_decoded = '\n' + '\n'.join(self.current_output.splitlines()[-lines_to_check:])
 
         # Grab the first pattern that was matched
         if len(re_strings) != 0:
