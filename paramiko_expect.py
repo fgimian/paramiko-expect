@@ -65,7 +65,7 @@ class SSHClientInteraction(object):
     def __init__(
         self, client, timeout=60, newline='\r', buffer_size=1024,
         display=False, encoding='utf-8', output_callback=default_output_func,
-        tty_width=80, tty_height=24, lines_to_check=2
+        tty_width=80, tty_height=24, lines_to_check=1
     ):
         self.channel = client.invoke_shell(width=tty_width, height=tty_height)
         self.timeout = timeout
