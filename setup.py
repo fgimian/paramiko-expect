@@ -8,7 +8,7 @@ with open('README.rst') as f:
 
 setup(
     name='paramiko-expect',
-    version='0.3.0',
+    version='0.3.1',
     url='https://github.com/fgimian/paramiko-expect',
     license='MIT',
     author='Fotis Gimian',
