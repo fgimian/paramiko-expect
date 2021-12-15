@@ -35,7 +35,7 @@ import select
 
 
 def strip_ansi_codes(s):
-    return re.sub(r'\x1b\[([0-9,A-Z]{1,2}(;[0-9]{1,2})?(;[0-9]{3})?)?[m|K]?', '', s)
+    return re.sub(r'\x1b\[([0-9,A-Z]{1,2}(;[0-9]{1,2})?(;[0-9]{3})?)?[m|K]?|\?(1049|2004)[hl]', '', s)
 
 
 def default_output_func(msg):
