@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import socket
+import logging
 
 import pytest
 try:
@@ -17,17 +18,27 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
+from ssh import SshContainer
+
 prompt = ".*:~#.*"
 
 
+@pytest.fixture(scope="session")
+def docker_ssh():
+    with SshContainer() as container:
+        print(container._container.logs().decode())
+        yield container
+
+
 @pytest.fixture(scope="module")
-def interact(request):
+def interact(request, docker_ssh):
     # Create a new SSH client object
     client = paramiko.SSHClient()
     # Set SSH key parameters to auto accept unknown hosts
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     # Connect to the host
-    client.connect(hostname="localhost", username="root", port=2222, key_filename='./test/id_rsa')
+    hostname, port = docker_ssh.get_address()
+    client.connect(hostname=hostname, username="root", port=port, key_filename='./test/id_rsa')
     # Create a client interaction class which will interact with the host
     interact = SSHClientInteraction(client, timeout=10, display=True)
 
@@ -103,10 +114,11 @@ def test_04_tail_empty_response(interact):
         interact.tail(line_prefix="test:", callback=lambda p, m: "", stop_callback=stop_callback)
 
 
-def test_05_context():
+def test_05_context(docker_ssh):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname="localhost", username="root", port=2222, key_filename='./test/id_rsa')
+    hostname, port = docker_ssh.get_address()
+    client.connect(hostname=hostname, username="root", port=port, key_filename='./test/id_rsa')
     with SSHClientInteraction(client, timeout=10, display=True) as interact:
         interact.send('ls -all /')
         interact.expect(prompt, timeout=120)
@@ -224,10 +236,11 @@ def test_07_close(interact):
         interact.close()
 
 
-def test_08_issue_25_skip_newline():
+def test_08_issue_25_skip_newline(docker_ssh):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname="localhost", username="root", port=2222, key_filename='./test/id_rsa')
+    hostname, port = docker_ssh.get_address()
+    client.connect(hostname=hostname, username="root", port=port, key_filename='./test/id_rsa')
     with SSHClientInteraction(client, timeout=10, display=True) as interact:
         interact.send('ls -all')
         interact.expect(prompt, timeout=5)
@@ -240,6 +253,7 @@ def test_08_issue_25_skip_newline():
 
         interact.send('ls -all')
         interact.expect(prompt, timeout=5)
+
 
 def test_09_utf8(interact):
     interact.send(u'André')
