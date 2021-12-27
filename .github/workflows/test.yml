@@ -13,8 +13,8 @@ jobs:
         # https://help.github.com/articles/virtual-environments-for-github-actions
         platform:
           - ubuntu-latest  # ubuntu-18.04
-          # - macos-latest  # macOS-10.14 currently broken
-          # - windows-latest  # windows-2019 need some work and love
+          # - macos-latest  # macOS-10.14
+          # - windows-latest  # windows-2019
         python-version: [2.7, 3.6, 3.7, 3.8, 3.9, pypy-3.6, pypy-3.7 ]
 
     steps:
@@ -31,8 +31,6 @@ jobs:
     - name: Test with pytest
       run: |
         sudo chown `whoami` `pwd`/test/id_rsa.pub
-        docker run -d -p 2222:22 -v `pwd`/examples:/examples -v `pwd`/test/id_rsa.pub:/root/.ssh/authorized_keys -e SSH_ENABLE_ROOT=true docker.io/panubo/sshd
-        sleep 2
         PYTHONIOENCODING=utf-8 py.test -s --cov paramiko_expect --cov-report term-missing
     - name: Upload coverage.xml to codecov
       if: ${{ matrix.python-version == '3.8' }}
