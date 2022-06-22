@@ -368,6 +368,10 @@ class SSHClientInteraction(object):
                 # Restore the attributes of the shell you were in
                 termios.tcsetattr(sys.stdin, termios.TCSADRAIN, original_tty)
         else:
+            # We must set the timeout to None so that we can bypass times when
+            # there is no available text to receive
+            self.channel.settimeout(None)
+
             def writeall(sock):
                 while True:
                     buffer = sock.recv(self.buffer_size)
