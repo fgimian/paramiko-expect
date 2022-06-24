@@ -16,6 +16,9 @@ jobs:
           # - macos-latest  # macOS-10.14
           # - windows-latest  # windows-2019
         python-version: [3.6, 3.7, 3.8, 3.9, pypy-3.6, pypy-3.7 ]
+        include:
+          - platform: windows-latest
+            python-version: 3.9
 
     steps:
     - uses: actions/checkout@v2
@@ -28,10 +31,14 @@ jobs:
         python -m pip install --upgrade pip setuptools
         pip install .
         pip install -r requirements-test.txt
+    - name: handle file ownership
+      if: ${{ matrix.platform == 'ubuntu-latest' }}
+      run: sudo chown `whoami` `pwd`/test/id_rsa.pub
     - name: Test with pytest
+      env:
+        PYTHONIOENCODING: utf-8
       run: |
-        sudo chown `whoami` `pwd`/test/id_rsa.pub
-        PYTHONIOENCODING=utf-8 py.test -s --cov paramiko_expect --cov-report term-missing
+        py.test -s --cov paramiko_expect --cov-report term-missing
     - name: Upload coverage.xml to codecov
       if: ${{ matrix.python-version == '3.8' }}
       uses: codecov/codecov-action@v1
