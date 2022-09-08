@@ -168,7 +168,7 @@ class SSHClientInteraction(object):
         ):
             current_buffer_output_decoded = ''
             # avoids paramiko hang when recv is not ready yet
-            while not self.channel.recv_ready():
+            while not self.channel.closed and not self.channel.recv_ready():
                 time.sleep(.009)
                 if time.time() >= (base_time + timeout):
                     print('EXCESS TIME RECV_READY TIMEOUT, did you expect() before a send()')
