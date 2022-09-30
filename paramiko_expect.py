@@ -60,14 +60,15 @@ class SSHClientInteraction(object):
     :param encoding: The character encoding to use.
     :param lines_to_check: The number of last few lines of the output to
                            look at, while matching regular expression(s)
+    :param term: terminal type used with invoke shell
     """
 
     def __init__(
         self, client, timeout=60, newline='\r', buffer_size=1024,
         display=False, encoding='utf-8', output_callback=default_output_func,
-        tty_width=80, tty_height=24, lines_to_check=1
+        tty_width=80, tty_height=24, lines_to_check=1, term='vt100'
     ):
-        self.channel = client.invoke_shell(width=tty_width, height=tty_height)
+        self.channel = client.invoke_shell(term=term, width=tty_width, height=tty_height)
         self.timeout = timeout
         self.newline = newline
         self.buffer_size = buffer_size
