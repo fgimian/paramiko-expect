@@ -19,6 +19,7 @@ import re
 import socket
 import struct
 import time
+import logging
 
 # Windows does not have termios
 try:
@@ -172,7 +173,7 @@ class SSHClientInteraction(object):
             while not self.channel.closed and not self.channel.recv_ready():
                 time.sleep(.009)
                 if time.time() >= (base_time + timeout):
-                    print('EXCESS TIME RECV_READY TIMEOUT, did you expect() before a send()')
+                    logging.info('EXCESS TIME RECV_READY TIMEOUT, did you expect() before a send()')
                     return -1
             # Read some of the output
             current_buffer = self.channel.recv(self.buffer_size)
