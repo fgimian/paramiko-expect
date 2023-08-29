@@ -168,7 +168,6 @@ class SSHClientInteraction(object):
                  if re.match(default_match_prefix + re_string + '$',
                              current_buffer_output_decoded, re.DOTALL)]
         ):
-            current_buffer_output_decoded = ''
             # avoids paramiko hang when recv is not ready yet
             while not self.channel.closed and not self.channel.recv_ready():
                 time.sleep(.009)
