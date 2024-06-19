@@ -136,7 +136,7 @@ class SSHClientInteraction(object):
         :return: An EOF returns -1, a regex metch returns 0 and a match in a
                  list of regexes returns the index of the matched string in
                  the list.
-        :raises: A socket.timeout exception is raised on timeout.
+        :raises: A TimeoutError exception is raised on timeout.
         """
 
         output_callback = output_callback if output_callback else self.output_callback
@@ -173,8 +173,8 @@ class SSHClientInteraction(object):
             while not self.channel.closed and not self.channel.recv_ready():
                 time.sleep(.009)
                 if time.time() >= (base_time + timeout):
-                    logging.info('EXCESS TIME RECV_READY TIMEOUT, did you expect() before a send()')
-                    return -1
+                    logging.info('EXCESS TIME RECV_READY TIMEOUT, did you expect() before a send()?')
+                    raise TimeoutError('{} not in response, {}s timeout exceeded'.format(re_strings,timeout))
             # Read some of the output
             current_buffer = self.channel.recv(self.buffer_size)
 
