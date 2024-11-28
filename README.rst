@@ -16,12 +16,25 @@ Paramiko Expect
 .. image:: https://img.shields.io/pypi/pyversions/paramiko-expect.svg
    :target:  https://pypi.python.org/pypi/paramiko-expect/
 
-
 .. image:: https://raw.githubusercontent.com/fgimian/paramiko-expect/master/images/paramiko-expect-logo.png
    :alt: Paramiko Expect Logo
 
 Artwork courtesy of `Open Clip Art
 Library <https://openclipart.org/detail/174780/openmouthed-robot>`_
+
+Repository Archived
+------------
+
+This project originally started as a POC while I was automating some tasks on Cisco CDS devices
+in my operations role. While the library worked well, I didn't actually get to use it much myself
+as I moved onto an engineering role soon after. Since then,
+`Israel Fruchter <https://github.com/fruch>`_ has been kindly leading maintenance of the project.
+
+Unfortunately, `Israel is also no longer using this project <https://github.com/fgimian/paramiko-expect/issues/96#issuecomment-2132608755>`_
+and `no suitable maintainers were found to take over <https://github.com/fgimian/paramiko-expect/issues/97>`_.
+
+As such, I have decided to archive the project and officially call it discontinued. The community
+is welcome to fork the project and continue its development if required.
 
 Introduction
 ------------
